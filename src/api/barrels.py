@@ -40,4 +40,4 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     ]
 
 with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(""))

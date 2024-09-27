@@ -45,4 +45,4 @@ if __name__ == "__main__":
     print(get_bottle_plan())
 
 with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        result = connection.execute(sqlalchemy.text(""))
