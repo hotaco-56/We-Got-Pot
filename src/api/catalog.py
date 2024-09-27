@@ -20,3 +20,10 @@ def get_catalog():
                 "potion_type": [100, 0, 0, 0],
             }
         ]
+
+with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(
+                "SELECT * FROM global_inventory"
+        ))
+        for row in result:
+              print(row)
