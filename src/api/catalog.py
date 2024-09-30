@@ -19,7 +19,7 @@ def get_catalog():
                         """
                 ))
                 result_list = result.first()
-                num_green_potions = result_list[1]
+                num_green_potions = result_list[0]
                 
     return [
             {
