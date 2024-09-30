@@ -60,8 +60,8 @@ def search_orders(
         "results": [
             {
                 "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
+                "item_sku": potion_sku,
+                "customer_name": customer_name,
                 "line_item_total": 50,
                 "timestamp": "2021-01-01T00:00:00Z",
             }
@@ -74,6 +74,12 @@ class Customer(BaseModel):
     character_class: str
     level: int
 
+class Cart:
+    customer: Customer
+    item_sku: str
+    cart_id: int
+    quantity: int
+
 @router.post("/visits/{visit_id}")
 def post_visits(visit_id: int, customers: list[Customer]):
     """
@@ -83,11 +89,15 @@ def post_visits(visit_id: int, customers: list[Customer]):
 
     return "OK"
 
+cart_list = [Cart]
 
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    return {"cart_id": 1}
+    customer_cart = Cart()
+    customer_cart.customer = new_cart
+    cart_list.append(customer_cart)
+    return {cart_list.index(customer_cart)}
 
 
 class CartItem(BaseModel):
@@ -97,7 +107,8 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-
+    cart_list[cart_id].item_sku = item_sku
+    cart_list[cart_id].quantity = cart_item.quantity
     return "OK"
 
 
@@ -107,5 +118,25 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    potions_bought = cart_list[cart_id].quantity
+    gold_paid = 50 * potions_bought
+    
+    with db.engine.begin() as connection:
+        inventory = connection.execute(sqlalchemy.text(
+            """
+            SELECT gold, num_green_potions
+            FROM global_inventory
+            """
+        ))
+        inventory_list = inventory.first()
+        gold = inventory_list[0]
+        num_green_potions = inventory_list[1]
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+        connection.execute(sqlalchemy.text(
+            f"""
+            UPDATE global_inventory
+            SET gold = {gold + gold_paid},
+                num_green_potions = {num_green_potions - potions_bought}
+            """
+        ))
+    return {"total_potions_bought": potions_bought, "total_gold_paid": gold_paid}
