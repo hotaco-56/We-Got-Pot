@@ -47,12 +47,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         num_green_potions = inventory_list[1]
         gold = inventory_list[2]
 
-        for barrel in wholesale_catalog:
-                for i in range(barrel.quantity - 1):
-                        if (barrel.potion_type[1] == 1 and barrel.price <= gold):
-                                num_green_ml += barrel.ml_per_barrel
-                                gold -= barrel.price
-                                barrels_purchased += 1
+        if (num_green_potions < 10):
+                for barrel in wholesale_catalog:
+                        for i in range(barrel.quantity - 1):
+                                if (barrel.potion_type[1] == 1 and barrel.price <= gold):
+                                        num_green_ml += barrel.ml_per_barrel
+                                        gold -= barrel.price
+                                        barrels_purchased += 1
          
         connection.execute(sqlalchemy.text(
                 f"""

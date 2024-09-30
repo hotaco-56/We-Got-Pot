@@ -58,7 +58,6 @@ def get_bottle_plan():
                         num_green_potions = {num_green_potions + green_potions_produced}
                         """
                 ))
-        if (green_potions_produced > 0):
                 return [
                 {
                         "potion_type": [0, 100, 0, 0],
