@@ -45,6 +45,8 @@ def get_bottle_plan():
         num_green_ml = inventory_list[0]
         num_green_potions = inventory_list[1]
 
+        green_potions_produced = 0
+
         if (num_green_ml >= 100):
                 green_ml_used = 100 * (inventory_list[0] // 100)
                 green_potions_produced = (inventory_list[0] // 100)
@@ -56,13 +58,13 @@ def get_bottle_plan():
                         num_green_potions = {num_green_potions + green_potions_produced}
                         """
                 ))
-
-        return [
-             {
-                  "potion_type": [0, 100, 0, 0],
-                  "quantity": green_potions_produced,
-             }
-        ]
+        if (green_potions_produced > 0):
+                return [
+                {
+                        "potion_type": [0, 100, 0, 0],
+                        "quantity": green_potions_produced,
+                }
+                ]
 
     return [
             {

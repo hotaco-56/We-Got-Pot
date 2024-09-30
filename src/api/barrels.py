@@ -61,12 +61,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 gold = {gold}
                 """
         ))
-        return [
-              {
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": barrels_purchased,
-              }
-        ]
+        if (barrels_purchased > 0):
+                return [
+                {
+                        "sku": "SMALL_GREEN_BARREL",
+                        "quantity": barrels_purchased,
+                }
+                ]
 
     return [
         {
