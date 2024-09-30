@@ -33,6 +33,7 @@ small_green_barrel_quantity = 0
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
+    barrels_purchased = 0
 
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
@@ -51,6 +52,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         if (barrel.potion_type[1] == 1 and barrel.price <= gold):
                                 num_green_ml += barrel.ml_per_barrel
                                 gold -= barrel.price
+                                barrels_purchased += 1
          
         connection.execute(sqlalchemy.text(
                 f"""
@@ -59,10 +61,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 gold = {gold}
                 """
         ))
+        return [
+              {
+                    "sku": "SMALL_GREEN_BARREL",
+                    "quantity": barrels_purchased,
+              }
+        ]
 
     return [
         {
-            "sku": "SMALL_GREEN_BARREL",
-            "quantity": small_green_barrel_quantity,
+            "sku": [],
+            "quantity": [],
         }
     ]
