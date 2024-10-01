@@ -64,7 +64,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         if (num_green_potions < 10):
                 for barrel in wholesale_catalog:
-                        for i in range(barrel.quantity - 1):
+                        for i in range(barrel.quantity):
                                 if (barrel.potion_type[1] == 1 and barrel.price <= gold):
                                         barrels_ordered += 1
          
