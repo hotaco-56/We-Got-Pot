@@ -97,7 +97,7 @@ def create_cart(new_cart: Customer):
     customer_cart = Cart()
     customer_cart.customer = new_cart
     cart_list.append(customer_cart)
-    return {cart_list.index(customer_cart)}
+    return {"cart_id":cart_list.index(customer_cart)}
 
 
 class CartItem(BaseModel):
