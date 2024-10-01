@@ -69,7 +69,7 @@ def get_bottle_plan():
     return [
             {
                 "potion_type": [],
-                "quantity": [],
+                "quantity": 0,
             }
         ]
 
