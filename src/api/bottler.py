@@ -20,6 +20,15 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(
+                f"""
+                UPDATE global_inventory
+                SET num_green_ml = num_green_ml - {potions_delivered[0].quantity * 100}
+                num_green_potions = num_green_potions + {potions_delivered[0].quantity},
+                """
+        ))
+
     return "OK"
 
 @router.post("/plan")
@@ -37,31 +46,23 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
             """
-            SELECT num_green_ml, num_green_potions
+            SELECT num_green_ml
             FROM global_inventory
             """
         ))
         inventory_list = inventory.first()
         num_green_ml = inventory_list[0]
-        num_green_potions = inventory_list[1]
 
-        green_potions_produced = 0
+        green_potions_ordered = 0
 
         if (num_green_ml >= 100):
-                green_ml_used = 100 * (inventory_list[0] // 100)
-                green_potions_produced = (inventory_list[0] // 100)
+                green_potions_ordered = (inventory_list[0] // 100)
 
-                connection.execute(sqlalchemy.text(
-                        f"""
-                        UPDATE global_inventory
-                        SET num_green_ml = {num_green_ml - green_ml_used}, 
-                        num_green_potions = {num_green_potions + green_potions_produced}
-                        """
-                ))
+        if (green_potions_ordered > 0):
                 return [
                 {
                         "potion_type": [0, 100, 0, 0],
-                        "quantity": green_potions_produced,
+                        "quantity": green_potions_ordered,
                 }
                 ]
 

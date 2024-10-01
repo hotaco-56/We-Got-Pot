@@ -24,6 +24,22 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
+    num_ml_delivered = 0
+    gold_spent = 0
+    for barrel in barrels_delivered:
+        num_ml_delivered += barrel.ml_per_barrel
+        gold_spent += barrel.price
+
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(
+                f"""
+                UPDATE global_inventory
+                SET num_green_ml = num_green_ml + {num_ml_delivered},
+                gold = {gold_spent}
+                """
+        ))
+
     return "OK"
 
 small_green_barrel_quantity = 0
@@ -33,7 +49,7 @@ small_green_barrel_quantity = 0
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
-    barrels_purchased = 0
+    barrels_ordered = 0
 
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
@@ -43,7 +59,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             """
         ))
         inventory_list = inventory.first()
-        num_green_ml = inventory_list[0]
         num_green_potions = inventory_list[1]
         gold = inventory_list[2]
 
@@ -51,24 +66,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 for barrel in wholesale_catalog:
                         for i in range(barrel.quantity - 1):
                                 if (barrel.potion_type[1] == 1 and barrel.price <= gold):
-                                        num_green_ml += barrel.ml_per_barrel
-                                        gold -= barrel.price
-                                        barrels_purchased += 1
+                                        barrels_ordered += 1
          
-        connection.execute(sqlalchemy.text(
-                f"""
-                UPDATE global_inventory
-                SET num_green_ml = {num_green_ml},
-                gold = {gold}
-                """
-        ))
-        if (barrels_purchased > 0):
+        if (barrels_ordered > 0):
                 return [
                 {
                         "sku": "SMALL_GREEN_BARREL",
-                        "quantity": barrels_purchased,
+                        "quantity": barrels_ordered,
                 }
-                ]
+        ] 
 
     return [
         {
