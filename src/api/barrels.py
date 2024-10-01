@@ -36,7 +36,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 f"""
                 UPDATE global_inventory
                 SET num_green_ml = num_green_ml + {num_ml_delivered},
-                gold = {gold_spent}
+                    gold = gold - {gold_spent}
                 """
         ))
 
