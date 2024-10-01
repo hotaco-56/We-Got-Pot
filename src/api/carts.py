@@ -107,8 +107,21 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    with db.engine.begin() as connection:
+        inventory = connection.execute(sqlalchemy.text(
+            """
+            SELECT num_green_potions
+            FROM global_inventory
+            """
+        ))
+        inventory_list = inventory.first()
+        num_green_potions = inventory_list[0]
     cart_list[cart_id].item_sku = item_sku
-    cart_list[cart_id].quantity = cart_item.quantity
+
+    if (cart_item.quantity > num_green_potions):
+        cart_list[cart_id].quantity = num_green_potions
+    else:
+        cart_list[cart_id].quantity = cart_item.quantity
     return "OK"
 
 
@@ -139,4 +152,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 num_green_potions = {num_green_potions - potions_bought}
             """
         ))
+    cart_list.pop(cart_id)
     return {"total_potions_bought": potions_bought, "total_gold_paid": gold_paid}
