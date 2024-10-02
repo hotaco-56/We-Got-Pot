@@ -28,7 +28,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     gold_spent = 0
 
     for barrel in barrels_delivered:
-        if (barrel.potion_type[0] == 1): #red potion
+        if (barrel.potion_type[0] == 1):
             red_ml_delivered = barrel.ml_per_barrel * barrel.quantity
         elif (barrel.potion_type[1] == 1):
             green_ml_delivered = barrel.ml_per_barrel * barrel.quantity
@@ -89,23 +89,28 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         for barrel in wholesale_catalog:
             if (barrel.potion_type[0] == 1 and num_red_potions < 3): #red barrel
-                for i in range(barrel.quantity):
-                    if (barrel.price <= gold_available):
-                        gold_available -= barrel.price
-                        red_barrels_ordered += 1
-                        red_sku = barrel.sku
+                if ((gold_available // barrel.price) > barrel.quantity):
+                    red_barrels_ordered = barrel.quantity
+                else:
+                    red_barrels_ordered = gold_available // barrel.price
+                red_sku = barrel.sku
+                gold_available -= red_barrels_ordered * barrel.price
+
             elif (barrel.potion_type[1] == 1 and num_green_potions < 3): #green barrel
-                for i in range(barrel.quantity):
-                    if (barrel.price <= gold_available):
-                        gold_available -= barrel.price
-                        green_barrels_ordered += 1
-                        green_sku = barrel.sku
+                if ((gold_available // barrel.price) > barrel.quantity):
+                    green_barrels_ordered = barrel.quantity
+                else:
+                    green_barrels_ordered = gold_available // barrel.price
+                green_sku = barrel.sku
+                gold_available -= green_barrels_ordered * barrel.price
+
             elif (barrel.potion_type[2] == 1 and num_blue_potions < 3): #blue barrel
-                for i in range(barrel.quantity):
-                    if (barrel.price <= gold_available):
-                        gold_available -= barrel.price
-                        blue_barrels_ordered += 1
-                        blue_sku = barrel.sku
+                if ((gold_available // barrel.price) > barrel.quantity):
+                    blue_barrels_ordered = barrel.quantity
+                else:
+                    blue_barrels_ordered = gold_available // barrel.price
+                blue_sku = barrel.sku
+                gold_available -= blue_barrels_ordered * barrel.price
 
         # Create receipt
         if (red_barrels_ordered > 0):
