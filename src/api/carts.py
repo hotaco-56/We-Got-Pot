@@ -203,4 +203,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     print(cart_checkout.payment)
     print(gold_paid)
     cart_list.pop(cart_id)
-    return {"total_potions_bought": num_potions_bought, "total_gold_paid": gold_paid}
+    
+    if (num_potions_bought > 0):
+        return {"total_potions_bought": num_potions_bought, "total_gold_paid": gold_paid}
+    return {"total_potions_bought":[], "total_gold_paid": []}
