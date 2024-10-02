@@ -135,14 +135,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
          
-        if (len(barrels_receipt) > 0):
-                print(f"BARRELS ORDERED:\n {barrels_receipt}\n")
-                print(f"GOLD LEFT:\n {gold_available}\n")
-                return barrels_receipt
-
-    return [
-        {
-            "sku": [],
-            "quantity": [],
-        }
-    ]
+    print(f"BARRELS ORDERED:\n {barrels_receipt}\n")
+    print(f"GOLD AFTER PURCHASE:\n {gold_available}\n")
+    return barrels_receipt

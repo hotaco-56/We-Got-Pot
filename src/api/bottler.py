@@ -91,34 +91,26 @@ def get_bottle_plan():
         if (red_potions_ordered > 0):
             potions_receipt.append(
                 {
-                    "potion_type": [1,0,0],
+                    "potion_type": [1,0,0,0],
                     "quantity": red_potions_ordered
                 }
             )
         if (green_potions_ordered > 0):
             potions_receipt.append(
                 {
-                    "potion_type": [0,1,0],
+                    "potion_type": [0,1,0,0],
                     "quantity": green_potions_ordered
                 }
             )
         if (blue_potions_ordered > 0):
             potions_receipt.append(
                 {
-                    "potion_type": [0,0,1],
+                    "potion_type": [0,0,1,0],
                     "quantity": blue_potions_ordered
                 }
             )
-         
-        if (len(potions_receipt) > 0):
-                print(f"potions ORDERED:\n {potions_receipt}\n")
-                return potions_receipt
-    return [
-            {
-                "potion_type": [],
-                "quantity": [],
-            }
-        ]
+
+        return potions_receipt
 
 if __name__ == "__main__":
     print(get_bottle_plan())
