@@ -134,6 +134,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "quantity": blue_barrels_ordered
                 }
             )
+        print(f"BARRELS ORDERED:\n {barrels_receipt}\n")
+        print(f"GOLD AFTER PURCHASE:\n {gold_available}\n")
+        return barrels_receipt
          
     print(f"BARRELS ORDERED:\n {barrels_receipt}\n")
     print(f"GOLD AFTER PURCHASE:\n {gold_available}\n")
