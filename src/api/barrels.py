@@ -77,6 +77,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         inventory_dict = inventory.mappings().first()
 
+        print(f"INVENTORY: {inventory_dict}")
+
         num_green_potions = inventory_dict['num_green_potions']
         gold_available = inventory_dict['gold']
         num_red_potions = inventory_dict['num_red_potions']
