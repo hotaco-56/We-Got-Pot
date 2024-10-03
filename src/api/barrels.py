@@ -60,6 +60,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
+    barrels_receipt = []
 
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
@@ -87,7 +88,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         red_sku = green_sku = blue_sku = ""
         red_barrels_ordered = green_barrels_ordered = blue_barrels_ordered = 0
 
-        barrels_receipt = []
 
         for barrel in wholesale_catalog:
             if (barrel.potion_type[0] == 1 and num_red_potions < 3): #red barrel
@@ -131,10 +131,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "quantity": blue_barrels_ordered
                     }
                 )
-
-        print(f"BARRELS ORDERED:\n {barrels_receipt}\n")
-        print(f"GOLD AFTER PURCHASE:\n {gold_available}\n")
-        return barrels_receipt
          
     print(f"BARRELS ORDERED: {barrels_receipt}")
     print(f"GOLD AFTER PURCHASE: {gold_available}")
