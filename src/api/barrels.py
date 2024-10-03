@@ -47,10 +47,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 """
         ))
 
-    print(f"GREEN ML DELIVERED:\n {green_ml_delivered}\n")
-    print(f"RED ML DELIVERED:\n {red_ml_delivered}\n")
-    print(f"BLUE ML DELIVERED:\n {blue_ml_delivered}\n")
-    print(f"GOLD SPENT:\n {gold_spent}\n")
+    print(f"GREEN ML DELIVERED: {green_ml_delivered}")
+    print(f"RED ML DELIVERED: {red_ml_delivered}")
+    print(f"BLUE ML DELIVERED: {blue_ml_delivered}")
+    print(f"GOLD SPENT: {gold_spent}")
 
     return "OK"
 
