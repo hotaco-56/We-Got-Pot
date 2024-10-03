@@ -79,6 +79,9 @@ class Cart:
     item_sku: str
     cart_id: int
     quantity: int
+    
+#LIST OF CARTS
+cart_list = [Cart]
 
 @router.post("/visits/{visit_id}")
 def post_visits(visit_id: int, customers: list[Customer]):
@@ -88,9 +91,6 @@ def post_visits(visit_id: int, customers: list[Customer]):
     print(customers)
 
     return "OK"
-
-#LIST OF CARTS
-cart_list = [Cart]
 
 @router.post("/")
 def create_cart(new_cart: Customer):
@@ -108,6 +108,9 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    red_potions_ordered = green_potions_ordered = blue_potions_ordered = 0
+    cart_list[cart_id].item_sku = item_sku
+
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
             """
@@ -121,10 +124,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         num_green_potions = inventory_dict['num_green_potions']
         num_red_potions = inventory_dict['num_red_potions']
         num_blue_potions = inventory_dict['num_blue_potions']
-
-        red_potions_ordered = green_potions_ordered = blue_potions_ordered = 0
-
-        cart_list[cart_id].item_sku = item_sku
 
         match item_sku:
             case "RED_POTION_0":
