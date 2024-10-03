@@ -24,13 +24,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     green_ml_used = red_ml_used = blue_ml_used = 0
 
     for potion in potions_delivered:
-        if (potion.potion_type[0] == 1):
+        if (potion.potion_type[0] == 100):
             red_potions_delivered = potion.quantity
             red_ml_used = potion.quantity * 100
-        elif (potion.potion_type[1] == 1):
+        elif (potion.potion_type[1] == 100):
             green_potions_delivered = potion.quantity
             green_ml_used = potion.quantity * 100
-        elif (potion.potion_type[2] == 1):
+        elif (potion.potion_type[2] == 100):
             blue_potions_delivered = potion.quantity
             blue_ml_used = potion.quantity * 100
 
@@ -47,8 +47,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 """
         ))
 
-    print(f"GREEN POTIONS DELIVERED: {green_potions_delivered}")
     print(f"RED POTIONS DELIVERED: {red_potions_delivered}")
+    print(f"GREEN POTIONS DELIVERED: {green_potions_delivered}")
     print(f"BLUE POTIONS DELIVERED: {blue_potions_delivered}")
 
     return "OK"
@@ -110,6 +110,7 @@ def get_bottle_plan():
                 }
             )
 
+        print(f"BOTTLER PLAN: {potions_receipt}")
         return potions_receipt
 
 if __name__ == "__main__":
