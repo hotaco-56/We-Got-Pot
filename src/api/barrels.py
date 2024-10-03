@@ -96,6 +96,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     red_barrels_ordered = gold_available // barrel.price
                 red_sku = barrel.sku
                 gold_available -= red_barrels_ordered * barrel.price
+                if (red_barrels_ordered > 0):
+                    barrels_receipt.append(
+                        {
+                            "sku": red_sku,
+                            "quantity": red_barrels_ordered
+                        }
+                    )
 
             elif (barrel.potion_type[1] == 1 and num_green_potions < 3): #green barrel
                 if ((gold_available // barrel.price) > barrel.quantity):
@@ -104,6 +111,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     green_barrels_ordered = gold_available // barrel.price
                 green_sku = barrel.sku
                 gold_available -= green_barrels_ordered * barrel.price
+                if (green_barrels_ordered > 0):
+                    barrels_receipt.append(
+                        {
+                            "sku": green_sku,
+                            "quantity": green_barrels_ordered
+                        }
+                    )
 
             elif (barrel.potion_type[2] == 1 and num_blue_potions < 3): #blue barrel
                 if ((gold_available // barrel.price) > barrel.quantity):
@@ -112,28 +126,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     blue_barrels_ordered = gold_available // barrel.price
                 blue_sku = barrel.sku
                 gold_available -= blue_barrels_ordered * barrel.price
-
-        if (red_barrels_ordered > 0):
-            barrels_receipt.append(
-                {
-                    "sku": red_sku,
-                    "quantity": red_barrels_ordered
-                }
-            )
-        if (green_barrels_ordered > 0):
-            barrels_receipt.append(
-                {
-                    "sku": green_sku,
-                    "quantity": green_barrels_ordered
-                }
-            )
-        if (blue_barrels_ordered > 0):
-            barrels_receipt.append(
-                {
-                    "sku": blue_sku,
-                    "quantity": blue_barrels_ordered
-                }
-            )
+                if (blue_barrels_ordered > 0):
+                    barrels_receipt.append(
+                        {
+                            "sku": blue_sku,
+                            "quantity": blue_barrels_ordered
+                        }
+                    )
          
     print(f"BARRELS ORDERED: {barrels_receipt}")
     print(f"GOLD AFTER PURCHASE: {gold_available}")
