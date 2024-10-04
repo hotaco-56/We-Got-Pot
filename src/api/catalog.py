@@ -59,5 +59,6 @@ def get_catalog():
                 "potion_type": [0, 100, 0, 0],
                }
         )
+    print(f"CATALOG: {catalog}")
     return catalog
 
