@@ -89,7 +89,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         red_barrels_ordered = green_barrels_ordered = blue_barrels_ordered = 0
 
         for barrel in wholesale_catalog:
-            if (barrel.potion_type[0] == 1 and num_red_potions < 3): #red barrel
+            if (barrel.potion_type[0] == 1 and num_red_potions < 1): #red barrel
                 if ((gold_available // barrel.price) > barrel.quantity):
                     red_barrels_ordered = barrel.quantity
                 else:
