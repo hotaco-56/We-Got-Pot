@@ -114,7 +114,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     red_potions_ordered = green_potions_ordered = blue_potions_ordered = 0
     cart_list[cart_id].item_sku = item_sku
 
-    print(f"{cart_id}, {item_sku}, {cart_item.quantity}")
+    print(f"CART CREATED: {cart_id}, ITEM_SKU: {item_sku}, AMOUNT: {cart_item.quantity}")
 
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
@@ -151,9 +151,9 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         connection.execute(sqlalchemy.text(
             f"""
             UPDATE global_inventory
-            SET num_red_potions = num_red_potions - {red_potions_ordered},
-                num_green_potions = num_green_potions - {green_potions_ordered},
-                num_blue_potions = num_blue_potions - {blue_potions_ordered}
+            SET num_red_potions = {num_red_potions - red_potions_ordered},
+                num_green_potions = {num_blue_potions - green_potions_ordered},
+                num_blue_potions = {num_blue_potions - blue_potions_ordered}
             """
         ))
 
