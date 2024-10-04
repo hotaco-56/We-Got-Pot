@@ -98,6 +98,7 @@ def create_cart(new_cart: Customer):
     customer_cart = Cart()
     customer_cart.customer = new_cart
     cart_list.append(customer_cart)
+    print(f"Cart list: {cart_list}")
     return {"cart_id":cart_list.index(customer_cart)}
 
 
@@ -110,6 +111,8 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     red_potions_ordered = green_potions_ordered = blue_potions_ordered = 0
     cart_list[cart_id].item_sku = item_sku
+
+    print(f"{cart_id}, {item_sku}, {cart_item.quantity}")
 
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
