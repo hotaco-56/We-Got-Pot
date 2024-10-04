@@ -104,7 +104,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         }
                     )
 
-            elif (barrel.potion_type[1] == 1 and num_green_potions < 3): #green barrel
+            elif (barrel.potion_type[1] == 1 and num_green_potions < 1): #green barrel
                 if ((gold_available // barrel.price) > barrel.quantity):
                     green_barrels_ordered = barrel.quantity
                 else:
@@ -119,7 +119,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         }
                     )
 
-            elif (barrel.potion_type[2] == 1 and num_blue_potions < 3): #blue barrel
+            elif (barrel.potion_type[2] == 1 and num_blue_potions < 1): #blue barrel
                 if ((gold_available // barrel.price) > barrel.quantity):
                     blue_barrels_ordered = barrel.quantity
                 else:
