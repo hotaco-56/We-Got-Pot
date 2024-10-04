@@ -34,7 +34,7 @@ def get_catalog():
                 "name": "red potion",
                 "quantity": num_red_potions,
                 "price": 50,
-                "potion_type": [0, 100, 0, 0],
+                "potion_type": [100, 0, 0, 0],
                }
         )
     
@@ -56,7 +56,7 @@ def get_catalog():
                 "name": "blue potion",
                 "quantity": num_blue_potions,
                 "price": 50,
-                "potion_type": [0, 100, 0, 0],
+                "potion_type": [0, 0, 100, 0],
                }
         )
     print(f"CATALOG: {catalog}")
