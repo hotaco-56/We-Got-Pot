@@ -22,7 +22,7 @@ def get_inventory():
                        num_red_potions,
                        num_red_ml,
                        num_blue_potions,
-                       num_blue_ml
+                       num_blue_ml,
                        gold
                 FROM global_inventory
                 """
