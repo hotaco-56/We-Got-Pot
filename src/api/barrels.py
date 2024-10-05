@@ -77,8 +77,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         ))
 
         inventory_dict = inventory.mappings().first()
-
         print(f"INVENTORY: {inventory_dict}")
+
+        blue_ml_wanted = 0
+        green_ml_wanted = 0
+        red_ml_wanted = 0
 
         num_green_potions = inventory_dict['num_green_potions']
         gold_available = inventory_dict['gold']
@@ -89,50 +92,25 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         red_barrels_ordered = green_barrels_ordered = blue_barrels_ordered = 0
 
         for barrel in wholesale_catalog:
-            if (barrel.potion_type[0] == 1 and num_red_potions < 1): #red barrel
-                if ((gold_available // barrel.price) > barrel.quantity):
-                    red_barrels_ordered = barrel.quantity
-                else:
-                    red_barrels_ordered = gold_available // barrel.price
-                red_sku = barrel.sku
-                gold_available -= red_barrels_ordered * barrel.price
-                if (red_barrels_ordered > 0):
+            if barrel.sku == "MINI_GREEN_BARREL":
+                if gold_available >= barrel.price:
                     barrels_receipt.append(
                         {
-                            "sku": red_sku,
-                            "quantity": red_barrels_ordered
+                            "sku": barrel.sku,
+                            "quantity": 1
                         }
                     )
+                    gold_available -= barrel.price
+            elif barrel.sku == "MINI_BLUE_BARREL":
+                if gold_available >= barrel.price:
+                    barrels_receipt.append(
+                        {
+                            "sku": barrel.sku,
+                            "quantity": 1
+                        }
+                    )
+                    gold_available -= barrel.price
 
-            elif (barrel.potion_type[1] == 1 and num_green_potions < 1): #green barrel
-                if ((gold_available // barrel.price) > barrel.quantity):
-                    green_barrels_ordered = barrel.quantity
-                else:
-                    green_barrels_ordered = gold_available // barrel.price
-                green_sku = barrel.sku
-                gold_available -= green_barrels_ordered * barrel.price
-                if (green_barrels_ordered > 0):
-                    barrels_receipt.append(
-                        {
-                            "sku": green_sku,
-                            "quantity": green_barrels_ordered
-                        }
-                    )
-
-            elif (barrel.potion_type[2] == 1 and num_blue_potions < 1): #blue barrel
-                if ((gold_available // barrel.price) > barrel.quantity):
-                    blue_barrels_ordered = barrel.quantity
-                else:
-                    blue_barrels_ordered = gold_available // barrel.price
-                blue_sku = barrel.sku
-                gold_available -= blue_barrels_ordered * barrel.price
-                if (blue_barrels_ordered > 0):
-                    barrels_receipt.append(
-                        {
-                            "sku": blue_sku,
-                            "quantity": blue_barrels_ordered
-                        }
-                    )
          
     print(f"BARRELS ORDERED: {barrels_receipt}")
     print(f"GOLD AFTER PURCHASE: {gold_available}")
