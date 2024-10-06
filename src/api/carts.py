@@ -152,7 +152,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
             f"""
             UPDATE global_inventory
             SET num_red_potions = {num_red_potions - red_potions_ordered},
-                num_green_potions = {num_blue_potions - green_potions_ordered},
+                num_green_potions = {num_green_potions - green_potions_ordered},
                 num_blue_potions = {num_blue_potions - blue_potions_ordered}
             """
         ))
