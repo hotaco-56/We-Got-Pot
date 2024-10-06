@@ -92,6 +92,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         red_barrels_ordered = green_barrels_ordered = blue_barrels_ordered = 0
 
         for barrel in wholesale_catalog:
+            if barrel.sku == "MINI_RED_BARREL":
+                if gold_available >= barrel.price:
+                    barrels_receipt.append(
+                        {
+                            "sku": barrel.sku,
+                            "quantity": 1
+                        }
+                    )
+                    gold_available -= barrel.price
             if barrel.sku == "MINI_GREEN_BARREL":
                 if gold_available >= barrel.price:
                     barrels_receipt.append(
