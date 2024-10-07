@@ -172,7 +172,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     print(cart_checkout.payment)
 
-    red_potion_price = 30
+    red_potion_price = 50
     green_potion_price = 50
     blue_potion_price = 50
     gold_paid = 0
