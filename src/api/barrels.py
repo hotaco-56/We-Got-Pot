@@ -110,7 +110,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         }
                     )
                     gold_available -= barrel.price
-            elif barrel.sku == "MINI_BLUE_BARREL":
+            elif barrel.sku == "SMALL_BLUE_BARREL":
                 if gold_available >= barrel.price:
                     barrels_receipt.append(
                         {
