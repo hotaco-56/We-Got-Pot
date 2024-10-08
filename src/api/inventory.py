@@ -17,29 +17,26 @@ def get_inventory():
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
                 """
-                SELECT num_green_potions, 
-                       num_green_ml,
-                       num_red_potions,
-                       num_red_ml,
-                       num_blue_potions,
-                       num_blue_ml,
-                       gold
+                SELECT gold, num_red_ml, num_green_ml, num_blue_ml
                 FROM global_inventory
                 """
-        ))
-        inventory_dict = inventory.mappings().fetchone()
-        num_red_potions = inventory_dict['num_red_potions']
-        num_green_potions = inventory_dict['num_green_potions']
-        num_blue_potions = inventory_dict['num_blue_potions']
-        num_red_ml = inventory_dict['num_red_ml']
-        num_green_ml = inventory_dict['num_green_ml']
-        num_blue_ml = inventory_dict['num_blue_ml']
-        gold = inventory_dict['gold']
+        )).mappings().fetchone()
 
-        num_potions = num_red_potions + num_green_potions + num_blue_potions
-        num_ml = num_red_ml + num_green_ml + num_blue_ml
+        potions = connection.execute(sqlalchemy.text(
+            """
+            SELECT quantity
+            FROM catalog
+            WHERE quantity > 0
+            """
+        )).mappings().fetchall()
 
-    return {"number_of_potions": num_potions, "ml_in_barrels": num_ml, "gold": gold}
+        num_potions = 0
+        for potion in potions:
+            num_potions += potion['quantity']
+
+        num_ml = inventory['num_red_ml'] + inventory['num_green_ml'] + inventory['num_blue_ml']
+
+    return {"number_of_potions": num_potions, "ml_in_barrels": num_ml, "gold": inventory['gold']}
 
 # Gets called once a day
 @router.post("/plan")
