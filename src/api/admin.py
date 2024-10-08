@@ -26,7 +26,13 @@ def reset():
                 num_blue_potions = 0,
                 num_red_ml = 0,
                 num_green_ml = 0,
-                num_blue_ml = 0
+                num_blue_ml = 0;
+
+            DELETE
+            FROM cart_items;
+
+            DELETE
+            FROM carts;
             """
         ))
     return "OK"
