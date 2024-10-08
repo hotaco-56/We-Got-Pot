@@ -42,7 +42,6 @@ def get_catalog():
                     "potion_type":  [potion['red'], potion['green'], potion['blue'], potion['dark']]
                 }
                 )
-    print(f"POTTION INVENTORY: {potion_inventory_dict}")
     print(f"CATALOG: {catalog}")
     return catalog
 

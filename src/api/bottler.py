@@ -20,16 +20,42 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    num_red_delivered = 0
+    num_green_delivered = 0
+    num_blue_delivered = 0
+
     with db.engine.begin() as connection:
-        potion_inventory = connection.execute(sqlalchemy.text(
+        catalog = connection.execute(sqlalchemy.text(
             """
-            UPDATE catalog
-            SET 
-            FROM 
+            SELECT sku, name, red, green, blue, dark
+            FROM catalog
+            WHERE sku IN ('RED_POTION_0', 'GREEN_POTION_0', 'BLUE_POTION_0')
             """
         )).mappings().fetchall()
 
-    
+        for potion in potions_delivered:
+            for sku in catalog:
+                if sku['red'] == potion.potion_type[0] and sku['green'] == potion.potion_type[1] and sku['blue'] == potion.potion_type[3] and sku['dark'] == potion.potion_type[3]:
+                    match sku['sku']:
+                        case 'RED_POTION_0':
+                            num_red_delivered += potion.quantity
+                        case 'GREEN_POTION_0':
+                            num_green_delivered += potion.quantity
+                        case 'BLUE_POTION_0':
+                            num_blue_delivered += potion.quantity
+
+        connection.execute(sqlalchemy.text(
+            f"""
+            UPDATE catalog
+            SET quantity = CASE sku
+            WHEN 'RED_POTION_0' THEN quantity + {num_red_delivered}
+            WHEN 'GREEN_POTION_0' THEN quantity + {num_green_delivered}
+            WHEN 'BLUE_POTION_0' THEN quantity + {num_blue_delivered}
+            ELSE quantity
+            END
+            WHERE sku IN ('RED_POTION_0', 'GREEN_POTION_0', 'BLUE_POTION_0')
+            """
+        ))
 
     return "OK"
 
@@ -62,16 +88,15 @@ def get_bottle_plan():
                    blue,
                    dark
             FROM catalog
-            WHERE sku = 'RED_POTION_0' OR sku = 'GREEN_POTION_0' OR sku = 'BLUE_POTION_0' 
+            WHERE sku IN ('RED_POTION_0', 'GREEN_POTION_0', 'BLUE_POTION_0')
             """
         )).mappings().fetchall()
 
         print(potion_inventory)
 
-        while num_red_ml != 0 and num_green_ml != 0 and num_blue_ml != 0:
+        while num_red_ml != 0 or num_green_ml != 0 or num_blue_ml != 0:
             for potion in potion_inventory:
                 if potion['red'] <= num_red_ml and potion['green'] <= num_green_ml and potion['blue'] <= num_blue_ml:
-                    num_producable = min(min(num_red_ml // potion['red'], num_green_ml // potion['green']), num_blue_ml // potion['blue'])
                     potions_receipt.append(
                         {
                             "potion_type": [potion['red'], potion['green'], potion['blue'], potion['dark']],
