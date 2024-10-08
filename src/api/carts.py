@@ -76,15 +76,6 @@ class Customer(BaseModel):
     character_class: str
     level: int
 
-class Cart:
-    customer: Customer
-    item_sku: str
-    cart_id: int
-    quantity: int
-    
-#LIST OF CARTS
-cart_list = [Cart]
-
 @router.post("/visits/{visit_id}")
 def post_visits(visit_id: int, customers: list[Customer]):
     """
@@ -97,11 +88,17 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    customer_cart = Cart()
-    customer_cart.customer = new_cart
-    cart_list.append(customer_cart)
-    print(f"Cart list: {cart_list}")
-    return {"cart_id":cart_list.index(customer_cart)}
+    with db.engine.begin() as connection:
+        cart_id = connection.execute(sqlalchemy.text(
+            f"""
+            INSERT INTO carts (customer_name, character_class, level)
+            VALUES ('{new_cart.customer_name}', '{new_cart.character_class}', '{new_cart.level}');
+            SELECT id
+            FROM carts
+            """
+        )).scalar()
+
+    return {"cart_id":cart_id}
 
 
 class CartItem(BaseModel):
@@ -111,54 +108,26 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-    red_potions_ordered = green_potions_ordered = blue_potions_ordered = 0
-    cart_list[cart_id].item_sku = item_sku
 
-    print(f"CART CREATED: {cart_id}, ITEM_SKU: {item_sku}, AMOUNT: {cart_item.quantity}")
+    print(f"CART CREATED:\nCART_ID: {cart_id}, ITEM_SKU: {item_sku}, AMOUNT: {cart_item.quantity}")
 
     with db.engine.begin() as connection:
-        inventory = connection.execute(sqlalchemy.text(
-            """
-            SELECT num_green_potions,
-                   num_red_potions,
-                   num_blue_potions
-            FROM global_inventory
-            """
-        ))
-        inventory_dict = inventory.mappings().fetchone()
-        num_green_potions = inventory_dict['num_green_potions']
-        num_red_potions = inventory_dict['num_red_potions']
-        num_blue_potions = inventory_dict['num_blue_potions']
-
-        match item_sku:
-            case "RED_POTION_0":
-                red_potions_ordered = cart_item.quantity
-                if (red_potions_ordered > num_red_potions):
-                    red_potions_ordered = num_red_potions
-                cart_list[cart_id].quantity = red_potions_ordered
-            case "GREEN_POTION_0":
-                green_potions_ordered = cart_item.quantity
-                if (green_potions_ordered > num_green_potions):
-                    green_potions_ordered = num_green_potions
-                cart_list[cart_id].quantity = green_potions_ordered
-            case "BLUE_POTION_0":
-                blue_potions_ordered = cart_item.quantity
-                if (blue_potions_ordered > num_blue_potions):
-                    blue_potions_ordered = num_blue_potions
-                cart_list[cart_id].quantity = blue_potions_ordered
-
-    with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(
+        cart = connection.execute(sqlalchemy.text(
             f"""
-            UPDATE global_inventory
-            SET num_red_potions = {num_red_potions - red_potions_ordered},
-                num_green_potions = {num_blue_potions - green_potions_ordered},
-                num_blue_potions = {num_blue_potions - blue_potions_ordered}
-            """
-        ))
+            UPDATE catalog
+            SET quantity = quantity - {cart_item.quantity}
+            WHERE sku = '{item_sku}';
 
-    print(f"Level {cart_list[cart_id].customer.level} {cart_list[cart_id].customer.character_class} {cart_list[cart_id].customer.customer_name} ordered:")
-    print(f"{cart_list[cart_id].item_sku}")
+            INSERT INTO cart_items (cart_id, sku, num_ordered)
+            VALUES ('{cart_id}', '{item_sku}', '{cart_item.quantity}');
+
+            SELECT customer_name, character_class, level
+            FROM carts
+            WHERE id = {cart_id}
+            """
+        )).mappings().fetchone()
+
+    print(f"Level {cart['level']} {cart['character_class']} {cart['customer_name']} added {cart_item.quantity} {item_sku} to their cart")
 
     return "OK"
 
@@ -169,45 +138,44 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-
-    print(cart_checkout.payment)
-
-    red_potion_price = 50
-    green_potion_price = 50
-    blue_potion_price = 50
-    gold_paid = 0
-
-    num_potions_bought = cart_list[cart_id].quantity
-
-    match cart_list[cart_id].item_sku:
-        case "RED_POTION_0":
-            gold_paid = red_potion_price * num_potions_bought
-        case "GREEN_POTION_0":
-            gold_paid = green_potion_price * num_potions_bought
-        case "BLUE_POTION_0":
-            gold_paid = blue_potion_price * num_potions_bought
-    
+    #need to update gold based on price of potion and quantity
+    #cart contains info on customer
+    #cart items contains reference to carts and reference to catalog and quantity
+    #cleanup cart and cart items
     with db.engine.begin() as connection:
-        inventory = connection.execute(sqlalchemy.text(
+        cart = connection.execute(sqlalchemy.text(
+            f"""
+            UPDATE global_inventory
+            SET gold = gold + (purchase.price * item.num_ordered)
+            FROM catalog AS purchase
+            JOIN cart_items AS item on item.sku = purchase.sku;
+
+            SELECT sku, level, character_class, customer_name, num_ordered
+            FROM carts JOIN cart_items on carts.id = cart_items.cart_id;
             """
-            SELECT gold
-            FROM global_inventory
+        )).fetchone()
+
+        price = connection.execute(sqlalchemy.text(
+            f"""
+            SELECT price
+            FROM catalog
+            WHERE sku = '{cart[0]}'
             """
-        ))
-        inventory_dict = inventory.mappings().fetchone()
-        gold = inventory_dict['gold']
+        )).scalar()
 
         connection.execute(sqlalchemy.text(
             f"""
-            UPDATE global_inventory
-            SET gold = {gold + gold_paid}
+            DELETE 
+            FROM cart_items
+            WHERE cart_id = {cart_id};
+
+            DELETE 
+            FROM carts
+            WHERE id = {cart_id}
             """
         ))
-    print(f"Level {cart_list[cart_id].customer.level} {cart_list[cart_id].customer.character_class} {cart_list[cart_id].customer.customer_name} paid:")
-    print(cart_checkout.payment)
-    print(gold_paid)
-    cart_list.pop(cart_id)
+
+        print(f"Level {cart[1]} {cart[2]} {cart[3]} paid {cart[4] * price} gold with {cart_checkout.payment}")
     
-    if (num_potions_bought > 0):
-        return {"total_potions_bought": num_potions_bought, "total_gold_paid": gold_paid}
-    return {"total_potions_bought":[], "total_gold_paid": []}
+    return "OK"
+    
