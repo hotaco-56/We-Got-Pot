@@ -92,8 +92,6 @@ def get_bottle_plan():
             """
         )).mappings().fetchall()
 
-        print(potion_inventory)
-
         while num_red_ml != 0 or num_green_ml != 0 or num_blue_ml != 0:
             for potion in potion_inventory:
                 if potion['red'] <= num_red_ml and potion['green'] <= num_green_ml and potion['blue'] <= num_blue_ml:
