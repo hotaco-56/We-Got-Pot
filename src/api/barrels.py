@@ -95,6 +95,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             "quantity": sku['quantity']
                         }
                     )
+
                     gold_available -= barrel.price * sku['quantity']
 
         connection.execute(sqlalchemy.text(
