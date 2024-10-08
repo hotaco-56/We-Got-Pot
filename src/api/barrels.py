@@ -42,15 +42,13 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 UPDATE global_inventory
                 SET num_green_ml = num_green_ml + {green_ml_delivered},
                     num_red_ml = num_red_ml + {red_ml_delivered},
-                    num_blue_ml = num_blue_ml + {blue_ml_delivered},
-                    gold = gold - {gold_spent}
+                    num_blue_ml = num_blue_ml + {blue_ml_delivered}
                 """
         ))
 
     print(f"GREEN ML DELIVERED: {green_ml_delivered}")
     print(f"RED ML DELIVERED: {red_ml_delivered}")
     print(f"BLUE ML DELIVERED: {blue_ml_delivered}")
-    print(f"GOLD SPENT: {gold_spent}")
 
     return "OK"
 
@@ -119,8 +117,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         }
                     )
                     gold_available -= barrel.price
+                    
+    with db.engine.begin() as connection:
+        inventory = connection.execute(sqlalchemy.text(
+            f"""
+            UPDATE global_inventory
+            SET gold = {gold_available}
+            """
+        ))
+                
 
          
     print(f"BARRELS ORDERED: {barrels_receipt}")
-    print(f"GOLD AFTER PURCHASE: {gold_available}")
+    print(f"GOLD SPENT: {gold_available}")
     return barrels_receipt
