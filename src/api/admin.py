@@ -27,6 +27,9 @@ def reset():
                 num_red_ml = 0,
                 num_green_ml = 0,
                 num_blue_ml = 0;
+            
+            UPDATE catalog
+            SET quantity = 0;
                 
             DELETE
             FROM cart_items;
