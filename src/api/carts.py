@@ -177,5 +177,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
         print(f"Level {cart[1]} {cart[2]} {cart[3]} paid {cart[4] * price} gold with {cart_checkout.payment}")
     
-    return "OK"
+    return { "total_potions_bought": cart[4], "total_gold_paid": cart[4] * price }
+    
     
