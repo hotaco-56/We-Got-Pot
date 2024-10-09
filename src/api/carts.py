@@ -93,11 +93,14 @@ def create_cart(new_cart: Customer):
             f"""
             INSERT INTO carts (customer_name, character_class, level)
             VALUES ('{new_cart.customer_name}', '{new_cart.character_class}', '{new_cart.level}');
+
             SELECT id
             FROM carts
+            ORDER BY id DESC
             """
         )).scalar()
 
+    print(f"CART CREATED:\nFor level {new_cart.level} {new_cart.character_class} {new_cart.customer_name} CART ID: {cart_id}")
     return {"cart_id":cart_id}
 
 
@@ -108,8 +111,6 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-
-    print(f"CART CREATED:\nCART_ID: {cart_id}, ITEM_SKU: {item_sku}, AMOUNT: {cart_item.quantity}")
 
     with db.engine.begin() as connection:
         cart = connection.execute(sqlalchemy.text(
