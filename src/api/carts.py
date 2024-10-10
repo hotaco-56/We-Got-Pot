@@ -147,14 +147,18 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         cart = connection.execute(sqlalchemy.text(
             f"""
             UPDATE global_inventory
-            SET gold = gold + (purchase.price * item.num_ordered)
+            SET gold = gold + (purchase.price * item.num_ordered * 0)
             FROM catalog AS purchase
-            JOIN cart_items AS item on item.sku = purchase.sku;
+            JOIN cart_items AS item ON item.sku = purchase.sku
+            WHERE item.cart_id = {cart_id};
 
             SELECT sku, level, character_class, customer_name, num_ordered
-            FROM carts JOIN cart_items on carts.id = cart_items.cart_id;
+            FROM carts JOIN cart_items ON cart_items.cart_id = {cart_id}
+            WHERE carts.id = {cart_id}
             """
         )).fetchone()
+
+        print(cart)
 
         price = connection.execute(sqlalchemy.text(
             f"""
@@ -164,6 +168,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             """
         )).scalar()
 
+        print(price)
+
         connection.execute(sqlalchemy.text(
             f"""
             DELETE 
@@ -172,7 +178,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
             DELETE 
             FROM carts
-            WHERE id = {cart_id}
+            WHERE id = {cart_id};
             """
         ))
 
