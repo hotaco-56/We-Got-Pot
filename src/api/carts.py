@@ -147,7 +147,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         cart = connection.execute(sqlalchemy.text(
             f"""
             UPDATE global_inventory
-            SET gold = gold + (purchase.price * item.num_ordered * 0)
+            SET gold = gold + (purchase.price * item.num_ordered)
             FROM catalog AS purchase
             JOIN cart_items AS item ON item.sku = purchase.sku
             WHERE item.cart_id = {cart_id};
