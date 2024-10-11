@@ -34,8 +34,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         )).mappings().fetchall()
 
         for potion in potions_delivered:
+            red_ml = potion.potion_type[0]
+            green_ml = potion.potion_type[1]
+            blue_ml = potion.potion_type[2]
+            dark_ml = potion.potion_type[3]
             for sku in catalog:
-                if sku['red'] == potion.potion_type[0] and sku['green'] == potion.potion_type[1] and sku['blue'] == potion.potion_type[2] and sku['dark'] == potion.potion_type[3]:
+                if sku['red'] == red_ml and sku['green'] == green_ml and sku['blue'] == blue_ml and sku['dark'] == dark_ml:
                     match sku['sku']:
                         case 'RED_POTION_0':
                             num_red_delivered += potion.quantity
