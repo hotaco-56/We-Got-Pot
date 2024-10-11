@@ -35,7 +35,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
         for potion in potions_delivered:
             for sku in catalog:
-                if sku['red'] == potion.potion_type[0] and sku['green'] == potion.potion_type[1] and sku['blue'] == potion.potion_type[3] and sku['dark'] == potion.potion_type[3]:
+                if sku['red'] == potion.potion_type[0] and sku['green'] == potion.potion_type[1] and sku['blue'] == potion.potion_type[2] and sku['dark'] == potion.potion_type[3]:
                     match sku['sku']:
                         case 'RED_POTION_0':
                             num_red_delivered += potion.quantity
