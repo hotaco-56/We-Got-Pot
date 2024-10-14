@@ -85,10 +85,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         print(f"INVENTORY: {inventory}")
 
         gold_available = inventory['gold']
+        total_ml = inventory['num_green_ml'] + inventory['num_red_ml'] + inventory['num_blue_ml']
 
         for sku in barrel_plan:
             for barrel in wholesale_catalog:
-                if barrel.sku == sku['sku'] and gold_available >= barrel.price:
+                if barrel.sku == sku['sku'] and gold_available >= barrel.price and barrel.ml_per_barrel + total_ml <= 10000:
                     barrels_receipt.append(
                         {
                             "sku": barrel.sku,
