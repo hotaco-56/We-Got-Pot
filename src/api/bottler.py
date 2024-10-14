@@ -35,7 +35,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             """
             SELECT sku, name, red, green, blue, dark
             FROM catalog
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'GREEN_BLUE')
+            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'CLERIC')
             """
         )).mappings().fetchall()
 
@@ -56,11 +56,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         case 'BLUE_POTION':
                             num_blue_delivered += potion.quantity
                             blue_ml_used += blue_ml
-                        case 'GREEN_BLUE':
-                            num_green_blue_delivered += potion.quantity
-                            green_ml_used += green_ml
-                            blue_ml_used += blue_ml
-                        case 'BLUE_RED':
+                        case 'CLERIC':
                             num_blue_red_delivered += potion.quantity
                             blue_ml_used += blue_ml
                             red_ml_used += red_ml
@@ -72,11 +68,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             WHEN 'RED_POTION' THEN quantity + {num_red_delivered}
             WHEN 'GREEN_POTION' THEN quantity + {num_green_delivered}
             WHEN 'BLUE_POTION' THEN quantity + {num_blue_delivered}
-            WHEN 'GREEN_BLUE' THEN quantity + {num_green_blue_delivered}
-            WHEN 'BLUE_RED' THEN quantity + {num_blue_red_delivered}
+            WHEN 'CLERIC' THEN quantity + {num_blue_red_delivered}
             ELSE quantity
             END
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'GREEN_BLUE');
+            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'CLERIC');
 
             UPDATE global_inventory
             SET num_red_ml = num_red_ml - {red_ml_used},
@@ -119,7 +114,7 @@ def get_bottle_plan():
                    blue,
                    dark
             FROM catalog
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'GREEN_BLUE', 'BLUE_RED')
+            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'CLERIC')
             """
         )).mappings().fetchall()
 
