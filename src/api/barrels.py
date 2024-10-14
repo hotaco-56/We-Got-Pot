@@ -28,11 +28,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     for barrel in barrels_delivered:
         if (barrel.potion_type[0] == 1):
-            red_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            red_ml_delivered += barrel.ml_per_barrel * barrel.quantity
         elif (barrel.potion_type[1] == 1):
-            green_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            green_ml_delivered += barrel.ml_per_barrel * barrel.quantity
         elif (barrel.potion_type[2] == 1):
-            blue_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            blue_ml_delivered += barrel.ml_per_barrel * barrel.quantity
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(
@@ -95,7 +95,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             "quantity": sku['quantity']
                         }
                     )
-
                     gold_available -= barrel.price * sku['quantity']
 
         connection.execute(sqlalchemy.text(
