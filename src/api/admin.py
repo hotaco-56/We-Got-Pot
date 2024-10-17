@@ -21,13 +21,12 @@ def reset():
             """
             UPDATE global_inventory
             SET gold = 100,
-                num_red_potions = 0,
-                num_green_potions = 0,
-                num_blue_potions = 0,
+                ml_capacity = 10000,
+                potin_capacity = 50,
                 num_red_ml = 0,
                 num_green_ml = 0,
                 num_blue_ml = 0;
-            
+
             UPDATE catalog
             SET quantity = 0;
                 
