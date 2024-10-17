@@ -152,9 +152,13 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             JOIN cart_items AS item ON item.sku = purchase.sku
             WHERE item.cart_id = {cart_id};
 
+            UPDATE cart_items
+            SET completed = TRUE
+            WHERE cart_items.cart_id = {cart_id};
+
             SELECT sku, level, character_class, customer_name, num_ordered
             FROM carts JOIN cart_items ON cart_items.cart_id = {cart_id}
-            WHERE carts.id = {cart_id}
+            WHERE carts.id = {cart_id};
             """
         )).fetchone()
 
