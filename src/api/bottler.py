@@ -121,7 +121,7 @@ def get_bottle_plan():
                    blue,
                    dark
             FROM catalog 
-            WHERE sku IN ('BLUE_RED', 'BLUE_POTION', 'GREEN_POTION', 'RED_BLUE')
+            WHERE sku IN ('BLUE_RED', 'BLUE_POTION', 'GREEN_POTION')
             """
         )).mappings().fetchall()
 
