@@ -111,7 +111,7 @@ def get_bottle_plan():
         num_blue_ml = inventory['num_blue_ml']
         num_dark_ml = inventory['num_dark_ml']
 
-        # BOTTLE PLAN
+        # BOTTLER PLAN
         potion_inventory = connection.execute(sqlalchemy.text(
             """
             SELECT sku,
@@ -121,7 +121,7 @@ def get_bottle_plan():
                    blue,
                    dark
             FROM catalog 
-            WHERE sku IN ('BLUE_RED', 'BLUE_POTION', 'GREEN_POTION')
+            WHERE sku IN ('RED_POTION', 'BLUE_POTION')
             """
         )).mappings().fetchall()
 
