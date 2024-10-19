@@ -86,9 +86,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             WHEN 'BLUE_POTION' THEN quantity + {num_blue_delivered}
             WHEN 'BLUE_RED' THEN quantity + {num_blue_red_delivered}
             WHEN 'RED_BLUE' THEN quantity + {num_red_blue_delivered}
+            WHEN 'RED_GREEN' THEN quantity + {num_red_green_delivered}
+            WHEN 'GREEN_RED' THEN quantity + {num_green_red_delivered}
             ELSE quantity
             END
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE');
+            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE', 'RED_GREEN', 'GREEN_RED');
 
             UPDATE global_inventory
             SET num_red_ml = num_red_ml - {red_ml_used},
