@@ -26,6 +26,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     num_green_blue_delivered = 0
     num_blue_red_delivered = 0
     num_red_blue_delivered = 0
+    num_green_red_delivered = 0
+    num_red_green_delivered = 0
 
     red_ml_used = 0
     green_ml_used = 0
@@ -65,6 +67,15 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                             num_red_blue_delivered += potion.quantity
                             blue_ml_used += blue_ml
                             red_ml_used += red_ml
+                        case 'GREEN_RED':
+                            num_green_red_delivered += potion.quantity
+                            green_ml_used += green_ml
+                            red_ml_used += red_ml
+                        case 'RED_GREEN':
+                            num_red_green_delivered += potion.quantity
+                            red_ml_used += red_ml
+                            green_ml_used += green_ml
+
 
         connection.execute(sqlalchemy.text(
             f"""
@@ -121,7 +132,7 @@ def get_bottle_plan():
                    blue,
                    dark
             FROM catalog 
-            WHERE sku IN ('RED_POTION', 'BLUE_POTION')
+            WHERE sku IN ('RED_POTION', 'BLUE_POTION', 'RED_GREEN', 'GREEN_RED')
             """
         )).mappings().fetchall()
 
