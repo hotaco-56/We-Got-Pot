@@ -4,6 +4,7 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
+from src.api import info
 
 router = APIRouter(
     prefix="/carts",
@@ -81,7 +82,56 @@ def post_visits(visit_id: int, customers: list[Customer]):
     """
     Which customers visited the shop today?
     """
-    print(customers)
+
+    num_fighters = 0
+    num_druids = 0
+    num_wizards = 0
+    num_clerics = 0
+    num_paladins = 0
+    num_rangers = 0
+    num_rogues = 0
+    num_monks = 0
+    num_other = 0
+
+    for customer in customers:
+        match customer.character_class:
+            case "Fighter":
+                num_fighters += 1
+            case "Druid":
+                num_druids += 1
+            case "Wizard":
+                num_wizards += 1
+            case "Cleric":
+                num_clerics += 1
+            case "Paladin":
+                num_paladins += 1
+            case "Ranger":
+                num_rangers += 1
+            case "Rogue":
+                num_rogues += 1
+            case "Monk":
+                num_monks += 1
+            case _:
+                num_other += 1
+    
+    if num_fighters > 0:
+        print(f"Fighters visited: {num_fighters}")
+    if num_druids > 0:
+        print(f"Druids visited: {num_druids}")
+    if num_wizards > 0:
+        print(f"Wizards visited: {num_wizards}")
+    if num_clerics > 0:
+        print(f"Clerics visited: {num_clerics}")
+    if num_paladins > 0:
+        print(f"Paladins visited: {num_paladins}")
+    if num_rangers > 0:
+        print(f"Rangers visited: {num_rangers}")
+    if num_rogues > 0:
+        print(f"Rogues visited: {num_rogues}")
+    if num_monks > 0:
+        print(f"Monks visited: {num_monks}")
+    if num_other > 0:
+        print(f"Others visited: {num_other}")
 
     return "OK"
 
@@ -100,7 +150,7 @@ def create_cart(new_cart: Customer):
             """
         )).scalar()
 
-    print(f"CART CREATED:\nFor level {new_cart.level} {new_cart.character_class} {new_cart.customer_name} CART ID: {cart_id}")
+    print(f"CART CREATED for level {new_cart.level} {new_cart.character_class} {new_cart.customer_name} CART ID: {cart_id}")
     return {"cart_id":cart_id}
 
 
@@ -153,7 +203,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             WHERE item.cart_id = {cart_id};
 
             UPDATE cart_items
-            SET completed = TRUE
+            SET completed = TRUE,
+                day = '{info.current_time.day}',
+                hour = {info.current_time.hour}
             WHERE cart_items.cart_id = {cart_id};
 
             SELECT sku, level, character_class, customer_name, num_ordered
@@ -162,8 +214,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             """
         )).fetchone()
 
-        print(cart)
-
         price = connection.execute(sqlalchemy.text(
             f"""
             SELECT price
@@ -171,8 +221,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             WHERE sku = '{cart[0]}'
             """
         )).scalar()
-
-        print(price)
 
         print(f"Level {cart[1]} {cart[2]} {cart[3]} paid {cart[4] * price} gold with {cart_checkout.payment}")
     
