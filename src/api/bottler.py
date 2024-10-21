@@ -38,7 +38,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             """
             SELECT sku, name, red, green, blue, dark
             FROM catalog
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE')
+            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE', 'RED_GREEN', 'GREEN_RED')
             """
         )).mappings().fetchall()
 
