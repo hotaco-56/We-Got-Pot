@@ -91,6 +91,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
     num_rangers = 0
     num_rogues = 0
     num_monks = 0
+    num_barbarians = 0
+    num_warlocks = 0
+    num_bards = 0
     num_other = 0
 
     for customer in customers:
@@ -111,6 +114,12 @@ def post_visits(visit_id: int, customers: list[Customer]):
                 num_rogues += 1
             case "Monk":
                 num_monks += 1
+            case "Barbarian":
+                num_barbarians += 1
+            case "Warlock":
+                num_warlocks += 1
+            case "Bard":
+                num_bards += 1
             case _:
                 num_other += 1
     
@@ -130,6 +139,12 @@ def post_visits(visit_id: int, customers: list[Customer]):
         print(f"Rogues visited: {num_rogues}")
     if num_monks > 0:
         print(f"Monks visited: {num_monks}")
+    if num_barbarians > 0:
+        print(f"Barbarians visited: {num_barbarians}")
+    if num_warlocks > 0:
+        print(f"Warlocks visited: {num_warlocks}")
+    if num_bards > 0:
+        print(f"Bards visited: {num_bards}")
     if num_other > 0:
         print(f"Others visited: {num_other}")
 
@@ -143,6 +158,9 @@ def create_cart(new_cart: Customer):
             f"""
             INSERT INTO carts (customer_name, character_class, level)
             VALUES ('{new_cart.customer_name}', '{new_cart.character_class}', '{new_cart.level}');
+
+            INSERT INTO customers (class, name, level)
+            WHERE NOT EXISTS 
 
             SELECT id
             FROM carts
