@@ -159,9 +159,6 @@ def create_cart(new_cart: Customer):
             INSERT INTO carts (customer_name, character_class, level)
             VALUES ('{new_cart.customer_name}', '{new_cart.character_class}', '{new_cart.level}');
 
-            INSERT INTO customers (class, name, level)
-            WHERE NOT EXISTS 
-
             SELECT id
             FROM carts
             ORDER BY id DESC
