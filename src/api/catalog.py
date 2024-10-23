@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
+from src.api import info
 
 router = APIRouter()
 
@@ -12,28 +13,24 @@ def get_catalog():
     Each unique item combination must have only a single price.
     """
     with db.engine.begin() as connection:
-        potion_inventory = connection.execute(sqlalchemy.text(
-            """ 
-            SELECT sku, 
-                   name, 
-                   quantity, 
-                   price, 
-                   red, 
-                   green, 
-                   blue, 
-                   dark
-            FROM catalog
-            ORDER BY quantity DESC
-            LIMIT 6 
-            """
-        ))
-        potion_inventory_dict = potion_inventory.mappings().fetchall()
-    
-    catalog = []
 
-    for potion in potion_inventory_dict:
+        # select what I have most of
+        # want to implement inserting into catalog table
+        catalog = connection.execute(sqlalchemy.text(
+            """
+            SELECT DISTINCT *
+            FROM potions
+            WHERE quantity > 0
+            ORDER BY quantity DESC
+            LIMIT 6
+            """
+        )).mappings().fetchall()
+
+    catalog_list = []
+
+    for potion in catalog:
         if potion['quantity'] > 0:
-                catalog.append(
+                catalog_list.append(
                 {
                     "sku": potion['sku'], 
                     "name": potion['name'],
@@ -42,6 +39,8 @@ def get_catalog():
                     "potion_type":  [potion['red'], potion['green'], potion['blue'], potion['dark']]
                 }
                 )
-    print(f"CATALOG: {catalog}")
-    return catalog
+    print(f"CATALOG:")
+    for sku in catalog_list:
+         print(sku)
+    return catalog_list
 

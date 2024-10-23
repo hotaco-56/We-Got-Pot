@@ -180,10 +180,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     with db.engine.begin() as connection:
         cart = connection.execute(sqlalchemy.text(
             f"""
-            UPDATE catalog
-            SET quantity = quantity - {cart_item.quantity}
-            WHERE sku = '{item_sku}';
-
             INSERT INTO cart_items (cart_id, sku, num_ordered)
             VALUES ('{cart_id}', '{item_sku}', '{cart_item.quantity}');
 
@@ -213,9 +209,14 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             f"""
             UPDATE global_inventory
             SET gold = gold + (purchase.price * item.num_ordered)
-            FROM catalog AS purchase
+            FROM potions AS purchase
             JOIN cart_items AS item ON item.sku = purchase.sku
             WHERE item.cart_id = {cart_id};
+
+            UPDATE potions
+            SET quantity = quantity - item.num_ordered
+            FROM cart_items AS item
+            WHERE item.cart_id = {cart_id} AND item.sku = potions.sku;
 
             UPDATE cart_items
             SET completed = TRUE,
@@ -232,7 +233,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         price = connection.execute(sqlalchemy.text(
             f"""
             SELECT price
-            FROM catalog
+            FROM potions
             WHERE sku = '{cart[0]}'
             """
         )).scalar()

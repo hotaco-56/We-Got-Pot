@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+from src.api import info
 
 router = APIRouter(
     prefix="/bottler",
@@ -18,87 +19,56 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
-    print(f"potions delievered: {potions_delivered} order_id: {order_id}")
-
-    num_red_delivered = 0
-    num_green_delivered = 0
-    num_blue_delivered = 0
-    num_green_blue_delivered = 0
-    num_blue_red_delivered = 0
-    num_red_blue_delivered = 0
-    num_green_red_delivered = 0
-    num_red_green_delivered = 0
-
     red_ml_used = 0
     green_ml_used = 0
     blue_ml_used = 0
+    dark_ml_used = 0
 
     with db.engine.begin() as connection:
-        catalog = connection.execute(sqlalchemy.text(
+        potions_inventory = connection.execute(sqlalchemy.text(
             """
-            SELECT sku, name, red, green, blue, dark
-            FROM catalog
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE', 'RED_GREEN', 'GREEN_RED')
+            SELECT sku, name, red, green, blue, dark, quantity
+            FROM potions
             """
         )).mappings().fetchall()
 
+        potions_delivered_dict = {}
+
+        #loop through delivered potions
         for potion in potions_delivered:
             red_ml = potion.potion_type[0]
             green_ml = potion.potion_type[1]
             blue_ml = potion.potion_type[2]
             dark_ml = potion.potion_type[3]
-            for sku in catalog:
-                if sku['red'] == red_ml and sku['green'] == green_ml and sku['blue'] == blue_ml and sku['dark'] == dark_ml:
-                    match sku['sku']:
-                        case 'RED_POTION':
-                            num_red_delivered += potion.quantity
-                            red_ml_used += red_ml
-                        case 'GREEN_POTION':
-                            num_green_delivered += potion.quantity
-                            green_ml_used += green_ml
-                        case 'BLUE_POTION':
-                            num_blue_delivered += potion.quantity
-                            blue_ml_used += blue_ml
-                        case 'BLUE_RED':
-                            num_blue_red_delivered += potion.quantity
-                            blue_ml_used += blue_ml
-                            red_ml_used += red_ml
-                        case 'RED_BLUE':
-                            num_red_blue_delivered += potion.quantity
-                            blue_ml_used += blue_ml
-                            red_ml_used += red_ml
-                        case 'GREEN_RED':
-                            num_green_red_delivered += potion.quantity
-                            green_ml_used += green_ml
-                            red_ml_used += red_ml
-                        case 'RED_GREEN':
-                            num_red_green_delivered += potion.quantity
-                            red_ml_used += red_ml
-                            green_ml_used += green_ml
 
+            #match to sku in database and add to dict
+            for sku in potions_inventory:
+                if red_ml == sku['red'] and green_ml == sku['green'] and blue_ml == sku['blue'] and dark_ml == sku['dark']:
+                    potions_delivered_dict[sku['sku']] = potion.quantity
+                    red_ml_used += red_ml
+                    green_ml_used += green_ml
+                    blue_ml_used += blue_ml
+                    dark_ml_used += dark_ml
+                    connection.execute(sqlalchemy.text(
+                        f"""
+                        UPDATE potions
+                        SET quantity = quantity + {potion.quantity}
+                        WHERE sku = '{sku['sku']}'
+                        """
+                    ))
 
+        #update mls
         connection.execute(sqlalchemy.text(
-            f"""
-            UPDATE catalog
-            SET quantity = CASE sku
-            WHEN 'RED_POTION' THEN quantity + {num_red_delivered}
-            WHEN 'GREEN_POTION' THEN quantity + {num_green_delivered}
-            WHEN 'BLUE_POTION' THEN quantity + {num_blue_delivered}
-            WHEN 'BLUE_RED' THEN quantity + {num_blue_red_delivered}
-            WHEN 'RED_BLUE' THEN quantity + {num_red_blue_delivered}
-            WHEN 'RED_GREEN' THEN quantity + {num_red_green_delivered}
-            WHEN 'GREEN_RED' THEN quantity + {num_green_red_delivered}
-            ELSE quantity
-            END
-            WHERE sku IN ('RED_POTION', 'GREEN_POTION', 'BLUE_POTION', 'BLUE_RED', 'RED_BLUE', 'RED_GREEN', 'GREEN_RED');
-
+           f"""
             UPDATE global_inventory
             SET num_red_ml = num_red_ml - {red_ml_used},
                 num_green_ml = num_green_ml - {green_ml_used},
-                num_blue_ml = num_blue_ml - {blue_ml_used}
-
+                num_blue_ml = num_blue_ml - {blue_ml_used},
+                num_dark_ml = num_dark_ml - {dark_ml_used},
+                potion_quantity = (SELECT SUM(quantity) FROM potions)
             """
         ))
+        print(f"POTIONS DELIVERED: {potions_delivered_dict}")
 
     return "OK"
 
@@ -107,6 +77,7 @@ def get_bottle_plan():
     """
     Go from barrel to bottle.
     """
+    print("CREATING BOTTLE PLAN")
     potions_receipt = []
 
     with db.engine.begin() as connection:
@@ -115,50 +86,115 @@ def get_bottle_plan():
             SELECT num_green_ml,
                    num_red_ml,
                    num_blue_ml,
-                   num_dark_ml
+                   num_dark_ml,
+                   potion_capacity,
+                   potion_quantity
             FROM global_inventory
             """
         )).mappings().fetchone()
+
         num_green_ml = inventory['num_green_ml']
         num_red_ml = inventory['num_red_ml']
         num_blue_ml = inventory['num_blue_ml']
         num_dark_ml = inventory['num_dark_ml']
+        potion_capacity = inventory['potion_capacity']
+        potion_quantity = inventory['potion_quantity']
+    
+        print(f"INVENTORY: {inventory}")
 
-        # BOTTLER PLAN
-        potion_inventory = connection.execute(sqlalchemy.text(
-            """
-            SELECT sku,
-                   name,
-                   red,
-                   green,
-                   blue,
-                   dark
-            FROM catalog 
-            WHERE sku IN ('BLUE_RED', 'BLUE_POTION', 'RED_GREEN', 'GREEN_RED')
-            """
-        )).mappings().fetchall()
+        bottle_plan_day = info.current_time.day
 
-        while num_red_ml != 0 or num_green_ml != 0 or num_blue_ml != 0:
+        # Check if near end of day
+        if info.current_time.hour == 22:
+            #Set to next day
+            bottle_plan_day = info.days_of_week[(info.days_of_week.index(info.current_time.day) + 1) % len(info.days_of_week)]
+            print(f"end of day!!! switchting plan! to {bottle_plan_day}")
+
+        match bottle_plan_day:
+            case 'Edgeday':
+                print("Using edgeday bottler plan")
+                bottle_plan = connection.execute(sqlalchemy.text(
+                    """
+                    SELECT DISTINCT *
+                    FROM edgeday_plan
+                    JOIN potions
+                    ON potions.sku = edgeday_plan.potion_sku
+                    ORDER BY max_quantity
+                    """
+                )).mappings().fetchall()
+            case 'Blesseday':
+                print("Using blesseday bottler plan")
+                bottle_plan = connection.execute(sqlalchemy.text(
+                    """
+                    SELECT DISTINCT *
+                    FROM blesseday_plan
+                    JOIN potions
+                    ON potions.sku = blesseday_plan.potion_sku
+                    ORDER BY max_quantity
+                    """
+                )).mappings().fetchall()
+            case _:
+                print("Using gods plan")
+                bottle_plan = connection.execute(sqlalchemy.text(
+                    """
+                    SELECT DISTINCT *
+                    FROM gods_plan
+                    JOIN potions
+                    ON potions.sku = gods_plan.potion_sku
+                    ORDER BY max_quantity DESC
+                    """
+                )).mappings().fetchall()
+
+        num_potions_ordered_dict = {}
+
+        for potion in bottle_plan:
+            num_potions_ordered_dict[potion['sku']] = 0
+
+        #orders potions based on plan
+        #keeps running while still have ml
+        #stops running if didn't order any potions
+        #                 
+        can_order_potions = True
+        while can_order_potions:
             potions_ordered = 0
-            for potion in potion_inventory:
-                if potion['red'] <= num_red_ml and potion['green'] <= num_green_ml and potion['blue'] <= num_blue_ml and potion['dark'] <= num_dark_ml:
-                    potions_receipt.append(
-                        {
-                            "potion_type": [potion['red'], potion['green'], potion['blue'], potion['dark']],
-                            "quantity": 1
-                        }
-                    )
+            for potion in bottle_plan:
+                enough_ml = potion['red'] <= num_red_ml and potion['green'] <= num_green_ml and potion['blue'] <= num_blue_ml and potion['dark'] <= num_dark_ml
+                enough_capacity = potion_quantity < potion_capacity
+                if  enough_ml and enough_capacity:
+
+                    if num_potions_ordered_dict[potion['sku']] >= potion['max_quantity']:
+                        continue
+
+                    #add to potions ordered
+                    num_potions_ordered_dict[potion['sku']] += 1
+
+                    #get ml used
                     num_red_ml -= potion['red']
                     num_green_ml -= potion['green']
                     num_blue_ml -= potion['blue']
+                    #update potions amount
                     potions_ordered += 1
-            if potions_ordered == 0:
-                break
+                    potion_quantity += 1
 
-        print(f"BOTTLER PLAN: {potions_receipt}")
+            if potions_ordered == 0:
+                can_order_potions = False
+
+        #create receipt to return
+        for potion in bottle_plan:
+            if num_potions_ordered_dict[potion['sku']] > 0:
+                potions_receipt.append(
+                    {
+                        "potion_type": [potion['red'], potion['green'], potion['blue'], potion['dark']],
+                        "quantity": num_potions_ordered_dict[potion['sku']]
+                    }
+                )
+
+        print(f"BOTTLER PLAN: {num_potions_ordered_dict}")
         print(f"red used: {inventory['num_red_ml'] - num_red_ml}")
         print(f"green used: {inventory['num_green_ml'] - num_green_ml}")
         print(f"blue used: {inventory['num_blue_ml'] - num_blue_ml}")
+        if potion_quantity == potion_capacity:
+            print("POTION CAPACITY REACHED!!!!")
         return potions_receipt
 
 

@@ -17,24 +17,16 @@ def get_inventory():
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
                 """
-                SELECT gold, num_red_ml, num_green_ml, num_blue_ml
+                UPDATE global_inventory
+                SET potion_quantity = (SELECT SUM(quantity) FROM potions);
+
+                SELECT gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml, potion_quantity
                 FROM global_inventory
                 """
         )).mappings().fetchone()
 
-        potions = connection.execute(sqlalchemy.text(
-            """
-            SELECT quantity
-            FROM catalog
-            WHERE quantity > 0
-            """
-        )).mappings().fetchall()
-
-        num_potions = 0
-        for potion in potions:
-            num_potions += potion['quantity']
-
-        num_ml = inventory['num_red_ml'] + inventory['num_green_ml'] + inventory['num_blue_ml']
+        num_ml = inventory['num_red_ml'] + inventory['num_green_ml'] + inventory['num_blue_ml'] + inventory['num_dark_ml']
+        num_potions = inventory['potion_quantity']
 
     return {"number_of_potions": num_potions, "ml_in_barrels": num_ml, "gold": inventory['gold']}
 
