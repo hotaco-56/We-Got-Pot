@@ -69,6 +69,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             """
         ))
         print(f"POTIONS DELIVERED: {potions_delivered_dict}")
+        print(f"red used: {red_ml_used}")
+        print(f"green used: {green_ml_used}")
+        print(f"blue used: {blue_ml_used}")
 
     return "OK"
 
@@ -190,9 +193,6 @@ def get_bottle_plan():
                 )
 
         print(f"BOTTLER PLAN: {num_potions_ordered_dict}")
-        print(f"red used: {inventory['num_red_ml'] - num_red_ml}")
-        print(f"green used: {inventory['num_green_ml'] - num_green_ml}")
-        print(f"blue used: {inventory['num_blue_ml'] - num_blue_ml}")
         if potion_quantity == potion_capacity:
             print("POTION CAPACITY REACHED!!!!")
         return potions_receipt

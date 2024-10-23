@@ -16,21 +16,29 @@ def get_catalog():
 
         # select what I have most of
         # want to implement inserting into catalog table
-        catalog = connection.execute(sqlalchemy.text(
-            """
-            SELECT DISTINCT *
+
+        current_day = info.current_time.day.lower()
+
+        current_day_catalog = connection.execute(sqlalchemy.text(
+            f"""
+            SELECT potions.sku, red, green, blue, dark, potions.quantity, price, name
+            FROM {current_day}_plan
+            JOIN potions
+            ON {current_day}_plan.potion_sku = potions.sku
+            WHERE potions.quantity > 0
+            UNION
+            SELECT sku, red, green, blue, dark, quantity, price, name
             FROM potions
             WHERE quantity > 0
-            ORDER BY quantity DESC
-            LIMIT 6
             """
         )).mappings().fetchall()
 
+
     catalog_list = []
 
-    for potion in catalog:
+    for potion in current_day_catalog:
         if potion['quantity'] > 0:
-                catalog_list.append(
+            catalog_list.append(
                 {
                     "sku": potion['sku'], 
                     "name": potion['name'],
@@ -38,7 +46,9 @@ def get_catalog():
                     "price": potion['price'], 
                     "potion_type":  [potion['red'], potion['green'], potion['blue'], potion['dark']]
                 }
-                )
+            )
+            if len(catalog_list) == 6:
+                    break
     print(f"CATALOG:")
     for sku in catalog_list:
          print(sku)
