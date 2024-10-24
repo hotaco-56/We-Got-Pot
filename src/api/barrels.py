@@ -414,4 +414,4 @@ def get_num_barrel_to_purchase(ml_needed: int, ml_per_barrel: int, ml_capacity: 
         num_to_purchase = barrel_quantity
     if (num_to_purchase * price) > gold_available:
         num_to_purchase = gold_available // price
-    return num_to_purchase
+    return int(num_to_purchase)
