@@ -45,10 +45,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             for sku in potions_inventory:
                 if red_ml == sku['red'] and green_ml == sku['green'] and blue_ml == sku['blue'] and dark_ml == sku['dark']:
                     potions_delivered_dict[sku['sku']] = potion.quantity
-                    red_ml_used += red_ml
-                    green_ml_used += green_ml
-                    blue_ml_used += blue_ml
-                    dark_ml_used += dark_ml
+                    red_ml_used += (red_ml * potion.quantity)
+                    green_ml_used += (green_ml * potion.quantity)
+                    blue_ml_used += (blue_ml * potion.quantity)
+                    dark_ml_used += (dark_ml * potion.quantity)
                     connection.execute(sqlalchemy.text(
                         f"""
                         UPDATE potions
