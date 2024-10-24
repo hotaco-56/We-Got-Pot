@@ -35,7 +35,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             green_ml_delivered += barrel.ml_per_barrel * barrel.quantity
         elif (barrel.potion_type[2] == 1):
             blue_ml_delivered += barrel.ml_per_barrel * barrel.quantity
-        gold_spent += barrel.price
+        gold_spent += barrel.price * barrel.quantity
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(
