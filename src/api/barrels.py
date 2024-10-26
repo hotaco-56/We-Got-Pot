@@ -118,6 +118,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     ON potions.sku = blesseday_plan.potion_sku
                     """
                 )).mappings().fetchall()
+            case 'Bloomday':
+                print("Using bloomday bottler plan")
+                bottle_plan = connection.execute(sqlalchemy.text(
+                    """
+                    SELECT DISTINCT *
+                    FROM bloomday_plan
+                    JOIN potions
+                    ON potions.sku = bloomday_plan.potion_sku
+                    ORDER BY max_quantity
+                    """
+                )).mappings().fetchall()
             case _:
                 print("Using gods plan")
                 bottle_plan = connection.execute(sqlalchemy.text(
