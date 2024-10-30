@@ -154,19 +154,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if red_ml_needed * 1.5 < num_red_ml:
             red_ml_needed  = 0
         else:
-            red_ml_needed *= 1.5
             ml_needed_list.append(red_ml_needed)
 
         if green_ml_needed * 1.5 < num_green_ml:
             green_ml_needed  = 0
         else:
-            green_ml_needed *= 1.5
             ml_needed_list.append(green_ml_needed)
 
         if blue_ml_needed * 1.5 < num_blue_ml:
             blue_ml_needed  = 0
         else:
-            blue_ml_needed *= 1.5
             ml_needed_list.append(blue_ml_needed)
 
         print(f"INVENTORY: {inventory}")
