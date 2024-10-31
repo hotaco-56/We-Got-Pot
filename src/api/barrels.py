@@ -287,7 +287,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "LARGE_RED_BARREL", "quantity": num_to_purchase})
                         #MEDIUM RED
                         if red_ml_needed >= MEDIUM_ML and (total_ml + MEDIUM_ML) <= ml_capacity and num_med_red > 0 and red_budget >= MEDIUM_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, MEDIUM_ML, ml_capacity, num_med_red, red_budget, MEDIUM_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, MEDIUM_ML, ml_capacity, num_med_red, gold_available, MEDIUM_ML_COST)
                             if num_to_purchase > 0:
                                 red_ml_needed -= num_to_purchase * MEDIUM_ML
                                 total_ml += num_to_purchase * MEDIUM_ML
@@ -298,7 +298,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "MEDIUM_RED_BARREL", "quantity": num_to_purchase})
                         #SMALL RED
                         if red_ml_needed >= SMALL_ML and (total_ml + SMALL_ML) <= ml_capacity and num_small_red > 0 and red_budget >= SMALL_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, SMALL_ML, ml_capacity, num_small_red, red_budget, SMALL_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, SMALL_ML, ml_capacity, num_small_red, gold_available, SMALL_ML_COST)
                             if num_to_purchase > 0:
                                 red_ml_needed -= num_to_purchase * SMALL_ML
                                 total_ml += num_to_purchase * SMALL_ML
@@ -309,7 +309,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "SMALL_RED_BARREL", "quantity": num_to_purchase})
                         #MINI RED
                         if red_ml_needed >= MINI_ML and (total_ml + MINI_ML) <= ml_capacity and num_mini_red > 0 and red_budget >= MINI_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, MINI_ML, ml_capacity, num_mini_red, red_budget, MINI_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(red_ml_needed, MINI_ML, ml_capacity, num_mini_red, gold_available, MINI_ML_COST)
                             if num_to_purchase > 0:
                                 red_ml_needed -= num_to_purchase * MINI_ML
                                 total_ml += num_to_purchase * MINI_ML
@@ -321,17 +321,18 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     case 'green':
                         #LARGE GREEN
                         if green_ml_needed >= LARGE_ML and (total_ml + LARGE_ML) <= ml_capacity and num_large_green > 0 and green_budget >= LARGE_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, LARGE_ML, ml_capacity, num_large_green, green_budget, LARGE_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, LARGE_ML, ml_capacity, num_large_green, gold_available, LARGE_ML_COST)
                             if num_to_purchase > 0:
                                 green_ml_needed -= num_to_purchase * LARGE_ML
                                 total_ml += num_to_purchase * LARGE_ML
                                 gold_available -= num_to_purchase * LARGE_ML_COST
                                 green_budget -= num_to_purchase * LARGE_ML_COST
                                 barrels_purchased += num_to_purchase
+                                num_large_green -= num_to_purchase
                                 barrels_receipt.append({"sku": "LARGE_GREEN_BARREL", "quantity": num_to_purchase})
                         #MEDIUM GREEN
                         if green_ml_needed >= MEDIUM_ML and (total_ml + MEDIUM_ML) <= ml_capacity and num_med_green > 0 and green_budget >= MEDIUM_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, MEDIUM_ML, ml_capacity, num_med_green, green_budget, MEDIUM_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, MEDIUM_ML, ml_capacity, num_med_green, gold_available, MEDIUM_ML_COST)
                             if num_to_purchase > 0:
                                 green_ml_needed -= num_to_purchase * MEDIUM_ML
                                 total_ml += num_to_purchase * MEDIUM_ML
@@ -341,7 +342,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "MEDIUM_GREEN_BARREL", "quantity": num_to_purchase})
                         #SMALL GREEN
                         if green_ml_needed >= SMALL_ML and (total_ml + SMALL_ML) <= ml_capacity and num_small_green > 0 and green_budget >= SMALL_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, SMALL_ML, ml_capacity, num_small_green,green_budget, SMALL_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, SMALL_ML, ml_capacity, num_small_green, gold_available, SMALL_ML_COST)
                             if num_to_purchase > 0:
                                 green_ml_needed -= num_to_purchase * SMALL_ML
                                 total_ml += num_to_purchase * SMALL_ML
@@ -351,7 +352,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "SMALL_GREEN_BARREL", "quantity": num_to_purchase})
                         #MINI GREEN
                         if green_ml_needed >= MINI_ML and (total_ml + MINI_ML) <= ml_capacity and num_mini_green > 0 and green_budget >= MINI_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, MINI_ML, ml_capacity, num_mini_green, green_budget, MINI_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(green_ml_needed, MINI_ML, ml_capacity, num_mini_green, gold_available, MINI_ML_COST)
                             if num_to_purchase > 0:
                                 green_ml_needed -= num_to_purchase * MINI_ML
                                 total_ml += num_to_purchase * MINI_ML
@@ -362,7 +363,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     case 'blue':
                         #LARGE BLUE
                         if blue_ml_needed >= LARGE_ML and (total_ml + LARGE_ML) <= ml_capacity and num_large_blue > 0 and blue_budget >= (LARGE_ML_COST + 100):
-                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, LARGE_ML, ml_capacity, num_large_blue, blue_budget, LARGE_ML_COST + 100)
+                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, LARGE_ML, ml_capacity, num_large_blue, gold_available, LARGE_ML_COST + 100)
                             if num_to_purchase > 0:
                                 blue_ml_needed -= num_to_purchase * LARGE_ML
                                 total_ml += num_to_purchase * LARGE_ML
@@ -372,7 +373,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "LARGE_BLUE_BARREL", "quantity": num_to_purchase})
                         #MEDIUM BLUE
                         if blue_ml_needed >= MEDIUM_ML and (total_ml + MEDIUM_ML) <= ml_capacity and num_med_blue > 0 and blue_budget >= (MEDIUM_ML_COST + 50):
-                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, MEDIUM_ML, ml_capacity, num_med_blue,blue_budget, MEDIUM_ML_COST + 50)
+                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, MEDIUM_ML, ml_capacity, num_med_blue, gold_available, MEDIUM_ML_COST + 50)
                             if num_to_purchase > 0:
                                 blue_ml_needed -= num_to_purchase * MEDIUM_ML
                                 total_ml += num_to_purchase * MEDIUM_ML
@@ -382,7 +383,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "MEDIUM_BLUE_BARREL", "quantity": num_to_purchase})
                         #SMALL BLUE
                         if blue_ml_needed >= SMALL_ML and (total_ml + SMALL_ML) <= ml_capacity and num_small_blue > 0 and blue_budget >= (SMALL_ML_COST + 20):
-                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, SMALL_ML, ml_capacity, num_small_blue, blue_budget, SMALL_ML_COST + 20)
+                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, SMALL_ML, ml_capacity, num_small_blue, gold_available, SMALL_ML_COST + 20)
                             if num_to_purchase > 0:
                                 blue_ml_needed -= num_to_purchase * SMALL_ML
                                 total_ml += num_to_purchase * SMALL_ML
@@ -392,7 +393,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 barrels_receipt.append({"sku": "SMALL_BLUE_BARREL", "quantity": num_to_purchase})
                         #MINI BLUE
                         if blue_ml_needed >= MINI_ML and (total_ml + MINI_ML) <= ml_capacity and num_mini_blue > 0 and blue_budget >=  MINI_ML_COST:
-                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, MINI_ML, ml_capacity, num_mini_blue, blue_budget, MINI_ML_COST)
+                            num_to_purchase = get_num_barrel_to_purchase(blue_ml_needed, MINI_ML, ml_capacity, num_mini_blue, gold_available, MINI_ML_COST)
                             if num_to_purchase > 0:
                                 blue_ml_needed -= num_to_purchase * MINI_ML
                                 total_ml += num_to_purchase * MINI_ML
