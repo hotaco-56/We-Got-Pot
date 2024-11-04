@@ -209,7 +209,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             f"""
             UPDATE global_inventory
             SET gold = gold + (purchase.price * item.num_ordered),
-                potion_capacity = (SELECT SUM(quantity) FROM potions)
+                potion_quantity = (SELECT SUM(quantity) FROM potions)
             FROM potions AS purchase
             JOIN cart_items AS item ON item.sku = purchase.sku
             WHERE item.cart_id = {cart_id};
