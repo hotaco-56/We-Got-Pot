@@ -38,13 +38,42 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         gold_spent += barrel.price * barrel.quantity
 
     with db.engine.begin() as connection:
+        for barrel in barrels_delivered:
+            if barrel.potion_type[0] == 1:
+                color = 'red'
+            elif barrel.potion_type[1] == 1:
+                color = 'green'
+            elif barrel.potion_type[2] == 1:
+                color = 'blue'
+            connection.execute(sqlalchemy.text(
+                """
+                INSERT INTO barrel_transactions (sku, quantity, ml, gold_spent, color)
+                VALUES (
+                    :sku,
+                    :quantity,
+                    :ml,
+                    :gold_spent,
+                    :color
+                )
+                """
+            ),
+                {
+                    'sku': barrel.sku,
+                    'quantity': barrel.quantity,
+                    'ml': barrel.ml_per_barrel * barrel.quantity,
+                    'gold_spent': barrel.price * barrel.quantity,
+                    'color': color
+                }
+            )
+
+    with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(
                 f"""
                 UPDATE global_inventory
-                SET num_green_ml = num_green_ml + {green_ml_delivered},
-                    num_red_ml = num_red_ml + {red_ml_delivered},
-                    num_blue_ml = num_blue_ml + {blue_ml_delivered},
-                    gold = gold - {gold_spent}
+                SET num_green_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'green'),
+                    num_red_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'red'),
+                    num_blue_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'blue'),
+                    gold = gold - (SELECT SUM(gold_spent) FROM barrel_transactions)
                 """
         ))
 
