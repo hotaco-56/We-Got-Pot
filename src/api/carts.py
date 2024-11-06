@@ -219,7 +219,17 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
                 num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
                 potion_quantity = (SELECT SUM(quantity) FROM potion_transactions) + 0,
-                gold = (SELECT SUM(gold_spent) FROM barrel_transactions) + (SELECT SUM(gold) FROM cart_items) + 0;
+                gold = 100 + 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM barrel_transactions)
+                        THEN (SELECT SUM(gold_spent) FROM barrel_transactions)
+                        ELSE 0
+                        END
+                    ) +
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM cart_items)
+                        THEN (SELECT SUM(gold) FROM cart_items)
+                        ELSE 0
+                        END
+                    );
 
             SELECT sku, level, character_class, customer_name, num_ordered
             FROM carts JOIN cart_items ON cart_items.cart_id = {cart_id}

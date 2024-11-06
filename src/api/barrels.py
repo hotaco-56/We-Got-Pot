@@ -91,7 +91,17 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                     num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
                     num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
                     num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
-                    gold = (SELECT SUM(gold_spent) FROM barrel_transactions) + (SELECT SUM(gold) FROM cart_items) + 0
+                    gold = 100 + 
+                        (SELECT CASE WHEN EXISTS (SELECT 1 FROM barrel_transactions)
+                            THEN (SELECT SUM(gold_spent) FROM barrel_transactions)
+                            ELSE 0
+                            END
+                        ) +
+                        (SELECT CASE WHEN EXISTS (SELECT 1 FROM cart_items)
+                            THEN (SELECT SUM(gold) FROM cart_items)
+                            ELSE 0
+                            END
+                        ) 
                 """
         ))
 
