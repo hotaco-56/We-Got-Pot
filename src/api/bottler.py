@@ -91,11 +91,31 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         connection.execute(sqlalchemy.text(
            f"""
             UPDATE global_inventory
-            SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
-                num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
-                num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0 ,
-                num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
-                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions) + 0
+            SET num_red_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(red) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_green_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(green) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_blue_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(blue) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_dark_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(dark) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions)
             """
         ))
         print(f"POTIONS DELIVERED: {potions_delivered_dict}")

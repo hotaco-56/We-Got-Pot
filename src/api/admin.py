@@ -23,9 +23,11 @@ def reset():
             SET gold = 100,
                 ml_capacity = 10000,
                 potion_capacity = 50,
+                potion_quantity = 0,
                 num_red_ml = 0,
                 num_green_ml = 0,
-                num_blue_ml = 0;
+                num_blue_ml = 0,
+                num_dark_ml = 0;
 
             UPDATE catalog
             SET quantity = 0;

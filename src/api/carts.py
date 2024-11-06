@@ -214,11 +214,31 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             WHERE cart_items.cart_id = {cart_id};
 
             UPDATE global_inventory
-            SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
-                num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
-                num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
-                num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
-                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions) + 0,
+            SET num_red_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(red) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_green_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(green) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_blue_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(blue) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                num_dark_ml = 
+                    (SELECT CASE WHEN EXISTS (SELECT 1 FROM ml_transactions)
+                        THEN (SELECT SUM(dark) FROM ml_transactions)
+                        ELSE 0
+                        END
+                    ),
+                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions),
                 gold = 100 + 
                     (SELECT CASE WHEN EXISTS (SELECT 1 FROM barrel_transactions)
                         THEN (SELECT SUM(gold_spent) FROM barrel_transactions)
