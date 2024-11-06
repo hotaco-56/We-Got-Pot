@@ -25,20 +25,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
-    red_ml_delivered = green_ml_delivered = blue_ml_delivered = dark_ml_delivered = 0
-    gold_spent = 0
-
-    for barrel in barrels_delivered:
-        if (barrel.potion_type[0] == 1):
-            red_ml_delivered += barrel.ml_per_barrel * barrel.quantity
-        elif (barrel.potion_type[1] == 1):
-            green_ml_delivered += barrel.ml_per_barrel * barrel.quantity
-        elif (barrel.potion_type[2] == 1):
-            blue_ml_delivered += barrel.ml_per_barrel * barrel.quantity
-        gold_spent += barrel.price * barrel.quantity
-
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
+            red_ml_delivered = green_ml_delivered = blue_ml_delivered = dark_ml_delivered = 0
         
             if (barrel.potion_type[0] == 1):
                 red_ml_delivered = barrel.ml_per_barrel * barrel.quantity
@@ -87,10 +76,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         connection.execute(sqlalchemy.text(
                 f"""
                 UPDATE global_inventory
-                SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
-                    num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
-                    num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
-                    num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
+                SET num_red_ml = (SELECT SUM(red) FROM ml_transactions),
+                    num_green_ml = (SELECT SUM(green) FROM ml_transactions),
+                    num_blue_ml = (SELECT SUM(blue) FROM ml_transactions),
+                    num_dark_ml = (SELECT SUM(dark) FROM ml_transactions),
                     gold = 100 + 
                         (SELECT CASE WHEN EXISTS (SELECT 1 FROM barrel_transactions)
                             THEN (SELECT SUM(gold_spent) FROM barrel_transactions)
@@ -104,11 +93,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                         ) 
                 """
         ))
-
-    print(f"GREEN ML DELIVERED: {green_ml_delivered}")
-    print(f"RED ML DELIVERED: {red_ml_delivered}")
-    print(f"BLUE ML DELIVERED: {blue_ml_delivered}")
-    print(f"GOLD SPENT: {gold_spent}")
 
     return "OK"
 
