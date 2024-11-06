@@ -17,9 +17,6 @@ def get_inventory():
     with db.engine.begin() as connection:
         inventory = connection.execute(sqlalchemy.text(
                 """
-                UPDATE global_inventory
-                SET potion_quantity = (SELECT SUM(quantity) FROM potions);
-
                 SELECT gold, num_red_ml, num_green_ml, num_blue_ml, num_dark_ml, potion_quantity
                 FROM global_inventory
                 """

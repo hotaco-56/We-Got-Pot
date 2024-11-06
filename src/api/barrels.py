@@ -25,7 +25,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
-    red_ml_delivered = green_ml_delivered = blue_ml_delivered = 0
+    red_ml_delivered = green_ml_delivered = blue_ml_delivered = dark_ml_delivered = 0
     gold_spent = 0
 
     for barrel in barrels_delivered:
@@ -39,30 +39,47 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
-            if barrel.potion_type[0] == 1:
-                color = 'red'
-            elif barrel.potion_type[1] == 1:
-                color = 'green'
-            elif barrel.potion_type[2] == 1:
-                color = 'blue'
+        
+            if (barrel.potion_type[0] == 1):
+                red_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            elif (barrel.potion_type[1] == 1):
+                green_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            elif (barrel.potion_type[2] == 1):
+                blue_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+            elif (barrel.potion_type[3] == 1):
+                dark_ml_delivered = barrel.ml_per_barrel * barrel.quantity
+
+            transaction = f"Purchased {barrel.quantity} {barrel.sku} for {barrel.price * barrel.quantity}"
+
             connection.execute(sqlalchemy.text(
                 """
-                INSERT INTO barrel_transactions (sku, quantity, ml, gold_spent, color)
+                INSERT INTO barrel_transactions (sku, quantity, transaction, gold_spent)
                 VALUES (
                     :sku,
                     :quantity,
-                    :ml,
-                    :gold_spent,
-                    :color
-                )
+                    :transaction,
+                    :gold_spent
+                );
+
+                INSERT INTO ml_transactions (transaction, red, green, blue, dark)
+                VALUES (
+                    :transaction,
+                    :red,
+                    :green,
+                    :blue,
+                    :dark
+                );
                 """
             ),
                 {
                     'sku': barrel.sku,
                     'quantity': barrel.quantity,
-                    'ml': barrel.ml_per_barrel * barrel.quantity,
-                    'gold_spent': barrel.price * barrel.quantity,
-                    'color': color
+                    'gold_spent': -(barrel.price * barrel.quantity),
+                    'transaction': transaction,
+                    'red': red_ml_delivered,
+                    'green': green_ml_delivered,
+                    'blue': blue_ml_delivered,
+                    'dark': dark_ml_delivered,
                 }
             )
 
@@ -70,10 +87,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         connection.execute(sqlalchemy.text(
                 f"""
                 UPDATE global_inventory
-                SET num_green_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'green'),
-                    num_red_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'red'),
-                    num_blue_ml = (SELECT SUM(ml) FROM barrel_transactions WHERE color = 'blue'),
-                    gold = gold - (SELECT SUM(gold_spent) FROM barrel_transactions)
+                SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
+                    num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
+                    num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
+                    num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
+                    gold = (SELECT SUM(gold_spent) FROM barrel_transactions) + (SELECT SUM(gold) FROM cart_items) + 0
                 """
         ))
 

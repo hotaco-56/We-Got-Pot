@@ -49,23 +49,53 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                     green_ml_used += (green_ml * potion.quantity)
                     blue_ml_used += (blue_ml * potion.quantity)
                     dark_ml_used += (dark_ml * potion.quantity)
-                    connection.execute(sqlalchemy.text(
-                        f"""
-                        UPDATE potions
-                        SET quantity = quantity + {potion.quantity}
-                        WHERE sku = '{sku['sku']}'
-                        """
-                    ))
 
-        #update mls
+                    transaction = f"{potion.quantity} {sku['sku']} delivered"
+
+                    connection.execute(sqlalchemy.text(
+                        """
+                        INSERT INTO potion_transactions (sku, transaction, quantity) 
+                        VALUES (
+                            :sku,
+                            :transaction,
+                            :quantity
+                        );
+
+                        INSERT INTO ml_transactions (transaction, red, green, blue, dark)
+                        VALUES (
+                            :transaction,
+                            :red,
+                            :green,
+                            :blue,
+                            :dark
+                        );
+
+                        UPDATE potions
+                        SET quantity = quantity + :quantity
+                        WHERE sku = :sku;
+
+                        """
+                    ),
+                        {
+                            'sku': sku['sku'],
+                            'transaction': transaction,
+                            'quantity': potion.quantity,
+                            'red': -sku['red'] * potion.quantity,
+                            'green': -sku['green'] * potion.quantity,
+                            'blue': -sku['blue'] * potion.quantity,
+                            'dark': -sku['dark'] * potion.quantity
+                        }
+                    )
+
+        #update mls and potion quant
         connection.execute(sqlalchemy.text(
            f"""
             UPDATE global_inventory
-            SET num_red_ml = num_red_ml - {red_ml_used},
-                num_green_ml = num_green_ml - {green_ml_used},
-                num_blue_ml = num_blue_ml - {blue_ml_used},
-                num_dark_ml = num_dark_ml - {dark_ml_used},
-                potion_quantity = (SELECT SUM(quantity) FROM potions)
+            SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
+                num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
+                num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0 ,
+                num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
+                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions) + 0
             """
         ))
         print(f"POTIONS DELIVERED: {potions_delivered_dict}")

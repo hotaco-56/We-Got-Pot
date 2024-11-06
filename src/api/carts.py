@@ -83,70 +83,28 @@ def post_visits(visit_id: int, customers: list[Customer]):
     Which customers visited the shop today?
     """
 
-    num_fighters = 0
-    num_druids = 0
-    num_wizards = 0
-    num_clerics = 0
-    num_paladins = 0
-    num_rangers = 0
-    num_rogues = 0
-    num_monks = 0
-    num_barbarians = 0
-    num_warlocks = 0
-    num_bards = 0
-    num_other = 0
+    customer_dict = {}
+
+    customer_dict['Fighter'] = 0
+    customer_dict['Druid'] = 0
+    customer_dict['Wizard'] = 0
+    customer_dict['Cleric'] = 0
+    customer_dict['Paladin'] = 0
+    customer_dict['Ranger'] = 0
+    customer_dict['Rogue'] = 0
+    customer_dict['Monk'] = 0
+    customer_dict['Barbarian'] = 0
+    customer_dict['Warlock'] = 0
+    customer_dict['Bard'] = 0
+    customer_dict['Other'] = 0
 
     for customer in customers:
-        match customer.character_class:
-            case "Fighter":
-                num_fighters += 1
-            case "Druid":
-                num_druids += 1
-            case "Wizard":
-                num_wizards += 1
-            case "Cleric":
-                num_clerics += 1
-            case "Paladin":
-                num_paladins += 1
-            case "Ranger":
-                num_rangers += 1
-            case "Rogue":
-                num_rogues += 1
-            case "Monk":
-                num_monks += 1
-            case "Barbarian":
-                num_barbarians += 1
-            case "Warlock":
-                num_warlocks += 1
-            case "Bard":
-                num_bards += 1
-            case _:
-                num_other += 1
-    
-    if num_fighters > 0:
-        print(f"Fighters visited: {num_fighters}")
-    if num_druids > 0:
-        print(f"Druids visited: {num_druids}")
-    if num_wizards > 0:
-        print(f"Wizards visited: {num_wizards}")
-    if num_clerics > 0:
-        print(f"Clerics visited: {num_clerics}")
-    if num_paladins > 0:
-        print(f"Paladins visited: {num_paladins}")
-    if num_rangers > 0:
-        print(f"Rangers visited: {num_rangers}")
-    if num_rogues > 0:
-        print(f"Rogues visited: {num_rogues}")
-    if num_monks > 0:
-        print(f"Monks visited: {num_monks}")
-    if num_barbarians > 0:
-        print(f"Barbarians visited: {num_barbarians}")
-    if num_warlocks > 0:
-        print(f"Warlocks visited: {num_warlocks}")
-    if num_bards > 0:
-        print(f"Bards visited: {num_bards}")
-    if num_other > 0:
-        print(f"Others visited: {num_other}")
+        customer_dict[customer.character_class] += 1
+
+    print("customers visited:")
+    for Class, count in customer_dict.items():
+        if count > 0:
+            print(f"{Class}s: {count}")
 
     return "OK"
 
@@ -176,20 +134,57 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    with db.engine.begin() as connection:
+        customer = connection.execute(sqlalchemy.text(
+            """
+            SELECT character_class AS class, customer_name AS name, level
+            FROM carts
+            WHERE carts.id = :cart_id
+            """
+        ),{'cart_id': cart_id}).mappings().fetchone()
+
 
     with db.engine.begin() as connection:
-        cart = connection.execute(sqlalchemy.text(
-            f"""
-            INSERT INTO cart_items (cart_id, sku, num_ordered)
-            VALUES ('{cart_id}', '{item_sku}', '{cart_item.quantity}');
-
-            SELECT customer_name, character_class, level
-            FROM carts
-            WHERE id = {cart_id}
+        potion_price = connection.execute(sqlalchemy.text(
             """
-        )).mappings().fetchone()
+            SELECT price
+            FROM potions
+            WHERE sku = :sku
+            """
+        ), {'sku': item_sku}).scalar()
 
-    print(f"Level {cart['level']} {cart['character_class']} {cart['customer_name']} added {cart_item.quantity} {item_sku} to their cart")
+    transaction = f"Level {customer['level']} {customer['class']} {customer['name']} purchased {cart_item.quantity} {item_sku} for {cart_item.quantity * potion_price}"
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(
+            """
+            INSERT INTO cart_items (cart_id, sku, num_ordered, gold)
+            VALUES (
+                :cart_id,
+                :sku,
+                :num_ordered,
+                :gold
+            );
+
+            INSERT INTO potion_transactions (sku, transaction, quantity)
+            VALUES (
+                :sku,
+                :transaction,
+                :quantity
+            );
+            """
+        ),
+            {
+                'cart_id': cart_id,
+                'sku': item_sku,
+                'num_ordered': cart_item.quantity,
+                'gold': cart_item.quantity * potion_price,
+                'transaction': transaction,
+                'quantity': -cart_item.quantity
+            }
+        )
+
+    print(transaction)
 
     return "OK"
 
@@ -207,13 +202,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     with db.engine.begin() as connection:
         cart = connection.execute(sqlalchemy.text(
             f"""
-            UPDATE global_inventory
-            SET gold = gold + (purchase.price * item.num_ordered),
-                potion_quantity = (SELECT SUM(quantity) FROM potions)
-            FROM potions AS purchase
-            JOIN cart_items AS item ON item.sku = purchase.sku
-            WHERE item.cart_id = {cart_id};
-
             UPDATE potions
             SET quantity = quantity - item.num_ordered
             FROM cart_items AS item
@@ -224,6 +212,14 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 day = '{info.current_time.day}',
                 hour = {info.current_time.hour}
             WHERE cart_items.cart_id = {cart_id};
+
+            UPDATE global_inventory
+            SET num_red_ml = (SELECT SUM(red) FROM ml_transactions) + 0,
+                num_green_ml = (SELECT SUM(green) FROM ml_transactions) + 0,
+                num_blue_ml = (SELECT SUM(blue) FROM ml_transactions) + 0,
+                num_dark_ml = (SELECT SUM(dark) FROM ml_transactions) + 0,
+                potion_quantity = (SELECT SUM(quantity) FROM potion_transactions) + 0,
+                gold = (SELECT SUM(gold_spent) FROM barrel_transactions) + (SELECT SUM(gold) FROM cart_items) + 0;
 
             SELECT sku, level, character_class, customer_name, num_ordered
             FROM carts JOIN cart_items ON cart_items.cart_id = {cart_id}

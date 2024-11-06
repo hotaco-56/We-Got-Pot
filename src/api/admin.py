@@ -32,9 +32,18 @@ def reset():
                 
             DELETE
             FROM cart_items;
-
+        
             DELETE
             FROM carts;
+
+            DELETE
+            FROM barrel_transactions;
+
+            DELETE
+            FROM potion_transactions;
+
+            DELETE
+            FROM ml_transactions;
             """
         ))
     return "OK"
