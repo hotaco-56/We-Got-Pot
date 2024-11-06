@@ -29,6 +29,9 @@ def reset():
 
             UPDATE catalog
             SET quantity = 0;
+
+            UPDATE potions
+            SET quantity = 0;
                 
             DELETE
             FROM cart_items;
