@@ -136,6 +136,10 @@ def search_orders(
         next = ""
     else:
         next = search_page + 5
+    
+    print(previous)
+    print(next)
+    print(search_page)
      
     return {
         "previous": previous,
