@@ -55,20 +55,49 @@ def search_orders(
     time is 5 total line items.
     """
 
+    MAX_RESULTS = 5
+
+    metadata_obj = sqlalchemy.MetaData()
+    carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
+    cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
+
+    stmt = sqlalchemy.select(carts, cart_items).join(cart_items, carts.c.id == cart_items.c.cart_id)
+
+    if customer_name != "":
+        stmt = stmt.where(carts.c.customer_name.ilike(f'%{customer_name}%'))
+    if potion_sku != "":
+        stmt = stmt.where(cart_items.c.sku.ilike(f'%{potion_sku}%'))
     
+    col = sort_col.name
+    if sort_order == search_sort_order.desc:
+        stmt = stmt.order_by(sqlalchemy.desc(col))
+    else:
+        stmt = stmt.order_by(col)
+
+    stmt.limit(MAX_RESULTS)
+
+    with db.engine.connect() as conn:
+        # Select for all events available
+        result = conn.execute(stmt).mappings().fetchall()
+        print(result)
+        json = []
+        for row in result:
+            json.append(
+                {
+                    "line_item_id": 1,
+                    "item_sku": row['sku'],
+                    "customer_name": row['customer_name'],
+                    "line_item_total": row['num_ordered'],
+                    "timestamp": row['created_at'],
+                }
+            )
+        
+     
     return {
         "previous": "",
         "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
-    }
+        "results": json
+        }
 
 
 
