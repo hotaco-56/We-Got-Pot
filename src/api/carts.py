@@ -127,7 +127,7 @@ def search_orders(
                     "timestamp": row.created_at
                 }
             )
-    if search_page < 5:
+    if search_page <= 5:
         previous = ""
     else:
         previous = search_page - 5
