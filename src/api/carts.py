@@ -73,6 +73,12 @@ def search_orders(
             order_by = 'created_at'
 
     with db.engine.begin() as connection:
+        total_ordered = connection.execute(sqlalchemy.text(
+            """
+            SELECT COUNT(id)
+            FROM carts
+            """
+        )).scalar_one()
         result = connection.execute(sqlalchemy.text(
             f"""
             SELECT
@@ -110,10 +116,19 @@ def search_orders(
                     "timestamp": row.created_at
                 }
             )
+    if search_page < 5:
+        previous = ""
+    else:
+        previous = search_page
+
+    if search_page + 5 >= total_ordered:
+        next = ""
+    else:
+        next = search_page + 5
      
     return {
-        "previous": "",
-        "next": "",
+        "previous": previous,
+        "next": next,
         "results": json
         }
 
