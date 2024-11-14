@@ -134,7 +134,7 @@ def search_orders(
     else:
         previous = search_page - 1
 
-    if (search_page + 1) * MAX_RESULTS_PER_PAGE >= total_ordered:
+    if (search_page + 1) * MAX_RESULTS_PER_PAGE > total_ordered:
         next = ""
     else:
         next = search_page + 1
