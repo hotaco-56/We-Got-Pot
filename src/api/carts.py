@@ -80,7 +80,8 @@ def search_orders(
                 cart_items.sku,
                 carts.customer_name,
                 cart_items.num_ordered,
-                cart_items.created_at
+                cart_items.created_at,
+                cart_items.gold
             FROM carts
             JOIN cart_items
             ON carts.id = cart_items.cart_id
@@ -103,9 +104,9 @@ def search_orders(
             json.append(
                 {
                     "line_item_id": row.id,
-                    "item_sku": row.sku,
+                    "item_sku": f'{row.num_ordered} {row.sku}',
                     "customer_name": row.customer_name,
-                    "line_item_total": row.num_ordered,
+                    "line_item_total": row.gold,
                     "timestamp": row.created_at
                 }
             )
