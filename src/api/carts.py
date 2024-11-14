@@ -140,13 +140,13 @@ def search_orders(
     else:
         next = search_page + 1
     
-    print(previous)
-    print(next)
-    print(search_page)
+    print(f"previous: {previous}")
+    print(f"next: {next}")
+    print(f"search page: {search_page}")
      
     return {
-        "previous": previous,
-        "next": next,
+        "previous": str(previous),
+        "next": str(next),
         "results": json
         }
 
