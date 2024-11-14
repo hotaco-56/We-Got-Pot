@@ -14,9 +14,9 @@ router = APIRouter(
 
 class search_sort_options(str, Enum):
     customer_name = "customer_name"
-    item_sku = "item_sku"
-    line_item_total = "line_item_total"
-    timestamp = "timestamp"
+    item_sku = "sku"
+    line_item_total = "num_ordered"
+    timestamp = "created_at"
 
 class search_sort_order(str, Enum):
     asc = "asc"
@@ -68,7 +68,7 @@ def search_orders(
     if potion_sku != "":
         stmt = stmt.where(cart_items.c.sku.ilike(f'%{potion_sku}%'))
     
-    col = sort_col.name
+    col = sort_col.value
     if sort_order == search_sort_order.desc:
         stmt = stmt.order_by(sqlalchemy.desc(col))
     else:
@@ -84,7 +84,7 @@ def search_orders(
         for row in result:
             json.append(
                 {
-                    "line_item_id": 1,
+                    "line_item_id": row["cart_id"],
                     "item_sku": row['sku'],
                     "customer_name": row['customer_name'],
                     "line_item_total": row['num_ordered'],
