@@ -119,7 +119,7 @@ def search_orders(
     if search_page < 5:
         previous = ""
     else:
-        previous = search_page
+        previous = search_page - 5
 
     if search_page + 5 >= total_ordered:
         next = ""
