@@ -14,9 +14,9 @@ router = APIRouter(
 
 class search_sort_options(str, Enum):
     customer_name = "customer_name"
-    item_sku = "sku"
-    line_item_total = "num_ordered"
-    timestamp = "created_at"
+    item_sku = "item_sku"
+    line_item_total = "line_item_total"
+    timestamp = "timestamp"
 
 class search_sort_order(str, Enum):
     asc = "asc"
@@ -69,10 +69,28 @@ def search_orders(
         stmt = stmt.where(cart_items.c.sku.ilike(f'%{potion_sku}%'))
     
     col = sort_col.value
-    if sort_order == search_sort_order.desc:
-        stmt = stmt.order_by(sqlalchemy.desc(col))
-    else:
-        stmt = stmt.order_by(col)
+    match sort_col:
+        case search_sort_options.customer_name:
+            if sort_order == search_sort_order.desc:
+                stmt = stmt.order_by(sqlalchemy.desc('customer_name'))
+            else:
+                stmt = stmt.order_by('customer_name')
+        case search_sort_options.item_sku:
+            if sort_order == search_sort_order.desc:
+                stmt = stmt.order_by(sqlalchemy.desc('sku'))
+            else:
+                stmt = stmt.order_by('sku')
+        case search_sort_options.line_item_total:
+            if sort_order == search_sort_order.desc:
+                stmt = stmt.order_by(sqlalchemy.desc('num_ordered'))
+            else:
+                stmt = stmt.order_by('num_ordered')
+        case search_sort_options.timestamp:
+            if sort_order == search_sort_order.desc:
+                stmt = stmt.order_by(sqlalchemy.desc('created_at'))
+            else:
+                stmt = stmt.order_by('created_at')
+            
 
     stmt.limit(MAX_RESULTS)
 
