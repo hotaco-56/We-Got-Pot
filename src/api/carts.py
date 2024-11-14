@@ -92,6 +92,7 @@ def search_orders(
                 'potion_sku': f'%{potion_sku}%'
             }
         ).scalar_one()
+        print(total_ordered)
         result = connection.execute(sqlalchemy.text(
             f"""
             SELECT
@@ -110,13 +111,13 @@ def search_orders(
                 sku ilike :potion_sku
             ORDER BY
                 {order_by} {sort_order.value}
-            LIMIT 5 OFFSET :search_page * 5
+            LIMIT 5 OFFSET :search_page
             """
         ),
             {
                 'customer_name': f'%{customer_name}%',
                 'potion_sku': f'%{potion_sku}%',
-                'search_page': search_page
+                'search_page': search_page * MAX_RESULTS_PER_PAGE
             }
         )
         for row in result:
@@ -134,7 +135,7 @@ def search_orders(
     else:
         previous = search_page - 1
 
-    if (search_page + 1) * MAX_RESULTS_PER_PAGE > total_ordered:
+    if (search_page + 1) * MAX_RESULTS_PER_PAGE >= total_ordered:
         next = ""
     else:
         next = search_page + 1
