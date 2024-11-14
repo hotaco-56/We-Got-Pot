@@ -75,7 +75,7 @@ def search_orders(
     with db.engine.begin() as connection:
         total_ordered = connection.execute(sqlalchemy.text(
             """
-            SELECT COUNT(id)
+            SELECT COUNT(carts.id)
             FROM carts
             JOIN cart_items
             ON carts.id = cart_items.cart_id
