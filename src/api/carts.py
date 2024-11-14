@@ -77,8 +77,19 @@ def search_orders(
             """
             SELECT COUNT(id)
             FROM carts
+            JOIN cart_items
+            ON carts.id = cart_items.cart_id
+            WHERE
+                customer_name ilike :customer_name
+                AND
+                sku ilike :potion_sku
             """
-        )).scalar_one()
+        ),
+            {
+                'customer_name': f'%{customer_name}%',
+                'potion_sku': f'%{potion_sku}%'
+            }
+        ).scalar_one()
         result = connection.execute(sqlalchemy.text(
             f"""
             SELECT
