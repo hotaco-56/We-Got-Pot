@@ -57,6 +57,8 @@ def search_orders(
 
     json = []
 
+    MAX_RESULTS_PER_PAGE = 5
+
     if search_page != "":
         search_page = int(search_page)
     else:
@@ -108,7 +110,7 @@ def search_orders(
                 sku ilike :potion_sku
             ORDER BY
                 {order_by} {sort_order.value}
-            LIMIT 5 OFFSET :search_page 
+            LIMIT 5 OFFSET :search_page * 5
             """
         ),
             {
@@ -127,15 +129,15 @@ def search_orders(
                     "timestamp": row.created_at
                 }
             )
-    if search_page <= 5:
+    if search_page * MAX_RESULTS_PER_PAGE < 5:
         previous = ""
     else:
-        previous = search_page - 5
+        previous = search_page - 1
 
-    if search_page + 5 >= total_ordered:
+    if (search_page + 1) * MAX_RESULTS_PER_PAGE >= total_ordered:
         next = ""
     else:
-        next = search_page + 5
+        next = search_page + 1
     
     print(previous)
     print(next)
