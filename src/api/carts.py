@@ -55,61 +55,60 @@ def search_orders(
     time is 5 total line items.
     """
 
-    MAX_RESULTS = 5
+    json = []
 
-    metadata_obj = sqlalchemy.MetaData()
-    carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
-    cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
+    if search_page != "":
+        search_page = int(search_page)
+    else:
+        search_page = 0
 
-    stmt = sqlalchemy.select(carts, cart_items).join(cart_items, carts.c.id == cart_items.c.cart_id)
-
-    if customer_name != "":
-        stmt = stmt.where(carts.c.customer_name.ilike(f'%{customer_name}%'))
-    if potion_sku != "":
-        stmt = stmt.where(cart_items.c.sku.ilike(f'%{potion_sku}%'))
-    
-    col = sort_col.value
     match sort_col:
-        case search_sort_options.customer_name:
-            if sort_order == search_sort_order.desc:
-                stmt = stmt.order_by(sqlalchemy.desc('customer_name'))
-            else:
-                stmt = stmt.order_by('customer_name')
         case search_sort_options.item_sku:
-            if sort_order == search_sort_order.desc:
-                stmt = stmt.order_by(sqlalchemy.desc('sku'))
-            else:
-                stmt = stmt.order_by('sku')
+            order_by = 'sku'
+        case search_sort_options.customer_name:
+            order_by = 'customer_name'
         case search_sort_options.line_item_total:
-            if sort_order == search_sort_order.desc:
-                stmt = stmt.order_by(sqlalchemy.desc('num_ordered'))
-            else:
-                stmt = stmt.order_by('num_ordered')
+            order_by = 'num_ordered'
         case search_sort_options.timestamp:
-            if sort_order == search_sort_order.desc:
-                stmt = stmt.order_by(sqlalchemy.desc('created_at'))
-            else:
-                stmt = stmt.order_by('created_at')
-            
+            order_by = 'created_at'
 
-    stmt.limit(MAX_RESULTS)
-
-    with db.engine.connect() as conn:
-        # Select for all events available
-        result = conn.execute(stmt).mappings().fetchall()
-        print(result)
-        json = []
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(
+            f"""
+            SELECT
+                carts.id,
+                cart_items.sku,
+                carts.customer_name,
+                cart_items.num_ordered,
+                cart_items.created_at
+            FROM carts
+            JOIN cart_items
+            ON carts.id = cart_items.cart_id
+            WHERE
+                customer_name ilike :customer_name
+                AND
+                sku ilike :potion_sku
+            ORDER BY
+                {order_by} {sort_order.value}
+            LIMIT 5 OFFSET :search_page 
+            """
+        ),
+            {
+                'customer_name': f'%{customer_name}%',
+                'potion_sku': f'%{potion_sku}%',
+                'search_page': search_page
+            }
+        )
         for row in result:
             json.append(
                 {
-                    "line_item_id": row["cart_id"],
-                    "item_sku": row['sku'],
-                    "customer_name": row['customer_name'],
-                    "line_item_total": row['num_ordered'],
-                    "timestamp": row['created_at'],
+                    "line_item_id": row.id,
+                    "item_sku": row.sku,
+                    "customer_name": row.customer_name,
+                    "line_item_total": row.num_ordered,
+                    "timestamp": row.created_at
                 }
             )
-        
      
     return {
         "previous": "",
