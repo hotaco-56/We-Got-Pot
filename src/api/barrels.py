@@ -192,13 +192,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     """
                 )).mappings().fetchall()
 
-        red_ml_needed = green_ml_needed = blue_ml_needed = 0
+        red_ml_needed = green_ml_needed = blue_ml_needed = dark_ml_needed = 0
         for potion in bottle_plan:
             #only count potions that we need more of
             if potion['max_quantity'] > potion['quantity']:
-                red_ml_needed += potion['red'] * (potion['max_quantity'] - potion['quantity'])
-                green_ml_needed += potion['green'] * (potion['max_quantity'] - potion['quantity'])
-                blue_ml_needed += potion['blue'] * (potion['max_quantity'] - potion['quantity'])
+                red_ml_needed += potion['red'] * potion['max_quantity'] 
+                green_ml_needed += potion['green'] * potion['max_quantity']
+                blue_ml_needed += potion['blue'] * potion['max_quantity'] 
 
         ml_needed_list = []
 
