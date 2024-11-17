@@ -216,16 +216,6 @@ def get_bottle_plan():
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case "Crownday":
-                bottle_plan = connection.execute(sqlalchemy.text(
-                    """
-                    SELECT DISTINCT *
-                    FROM crownday_plan AS plan
-                    JOIN potions
-                    ON potions.sku = plan.potion_sku
-                    ORDER BY max_quantity
-                    """
-                )).mappings().fetchall()
             case "Blesseday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
