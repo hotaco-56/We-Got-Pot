@@ -158,97 +158,92 @@ def get_bottle_plan():
         bottle_plan_day = info.current_time.day
 
         # Check if near end of day
-        if info.current_time.hour == 20:
+        if info.current_time.hour == 18:
             #Set to next day
             bottle_plan_day = info.days_of_week[(info.days_of_week.index(info.current_time.day) + 1) % len(info.days_of_week)]
             print(f"end of day!!! switchting plan! to {bottle_plan_day}")
 
+        print(f"Bottling Using {bottle_plan_day} plan")
+
         match bottle_plan_day:
-            case 'Edgeday':
-                print("Using edgeday bottler plan")
+            case "Edgeday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM edgeday_plan
+                    FROM edgeday_plan AS plan
                     JOIN potions
-                    ON potions.sku = edgeday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case 'Blesseday':
-                print("Using blesseday bottler plan")
+            case "Bloomday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM blesseday_plan
+                    FROM bloomday_plan AS plan
                     JOIN potions
-                    ON potions.sku = blesseday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case 'Soulday':
-                print("Using soulday bottler plan")
+            case "Arcanaday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM soulday_plan
+                    FROM arcanaday_plan AS plan
                     JOIN potions
-                    ON potions.sku = soulday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case 'Bloomday':
-                print("Using bloomday bottler plan")
+            case "Hearthday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM bloomday_plan
+                    FROM hearthday_plan AS plan
                     JOIN potions
-                    ON potions.sku = bloomday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case 'Arcanaday':
-                print("Using arcanaday barrel plan")
+            case "Crownday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM arcanaday_plan
+                    FROM crownday_plan AS plan
                     JOIN potions
-                    ON potions.sku = arcanaday_plan.potion_sku
-                    """
-                )).mappings().fetchall()
-            case 'Crownday':
-                print("Using Crownday bottler plan")
-                bottle_plan = connection.execute(sqlalchemy.text(
-                    """
-                    SELECT DISTINCT *
-                    FROM crownday_plan
-                    JOIN potions
-                    ON potions.sku = crownday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case 'Soulday':
-                print("Using Soulday bottler plan")
+            case "Crownday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM soulday_plan
+                    FROM crownday_plan AS plan
                     JOIN potions
-                    ON potions.sku = soulday_plan.potion_sku
+                    ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
-            case _:
-                print("Using gods plan")
+            case "Blesseday":
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM gods_plan
+                    FROM blesseday_plan AS plan
                     JOIN potions
-                    ON potions.sku = gods_plan.potion_sku
-                    ORDER BY max_quantity DESC
+                    ON potions.sku = plan.potion_sku
+                    ORDER BY max_quantity
+                    """
+                )).mappings().fetchall()
+            case "Soulday":
+                bottle_plan = connection.execute(sqlalchemy.text(
+                    """
+                    SELECT DISTINCT *
+                    FROM soulday_plan AS plan
+                    JOIN potions
+                    ON potions.sku = plan.potion_sku
+                    ORDER BY max_quantity
                     """
                 )).mappings().fetchall()
 
