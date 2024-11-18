@@ -174,7 +174,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 bottle_plan = connection.execute(sqlalchemy.text(
                     """
                     SELECT DISTINCT *
-                    FROM heartday_plan AS plan
+                    FROM hearthday_plan AS plan
                     JOIN potions
                     ON potions.sku = plan.potion_sku
                     ORDER BY max_quantity
