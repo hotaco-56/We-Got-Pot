@@ -158,7 +158,7 @@ def get_bottle_plan():
         bottle_plan_day = info.current_time.day
 
         # Check if near end of day
-        if info.current_time.hour == 18:
+        if info.current_time.hour >= 20:
             #Set to next day
             bottle_plan_day = info.days_of_week[(info.days_of_week.index(info.current_time.day) + 1) % len(info.days_of_week)]
             print(f"end of day!!! switchting plan! to {bottle_plan_day}")
