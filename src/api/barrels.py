@@ -342,6 +342,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         SMALL_ML = 500
         MINI_ML = 200
 
+        LARGE_DARK_ML_COST = 750
         LARGE_ML_COST = 500
         MEDIUM_ML_COST = 250
         SMALL_ML_COST = 100
@@ -351,8 +352,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         times_ran = 0
         #Get optimal barrel
 
-        #IMPORTANT
-        #need to update barrel quantity or else break if buy too many barrels!!!!
         while (True):
             barrels_purchased = 0
             for ml_needed in ml_priority_list:
@@ -445,7 +444,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 gold_available -= num_to_purchase * MINI_ML_COST
                                 green_budget -= num_to_purchase * MINI_ML_COST
                                 barrels_purchased += num_to_purchase
-                                num_small_green -= num_to_purchase
+                                num_mini_green -= num_to_purchase
                                 barrel_receipt_dict['MINI_GREEN_BARREL'] += num_to_purchase
                     case 'blue':
                         #LARGE BLUE
