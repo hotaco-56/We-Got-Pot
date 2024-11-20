@@ -62,7 +62,7 @@ def get_capacity_plan():
         
     return {
         "potion_capacity": 1 if purchase_pot else 0,
-        "ml_capacity": 1 if purchase_ml else 0
+        "ml_capacity": 2 if purchase_ml else 0
         }
 
 class CapacityPurchase(BaseModel):
