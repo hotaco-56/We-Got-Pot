@@ -55,6 +55,10 @@ def get_capacity_plan():
         purchase_ml = True
     if ml_cap == 20000 and potion_cap == 100 and gold >= 15000:
         purchase_pot = True
+        purchase_ml = True
+    if gold >= 20000:
+        purchase_pot = True
+        purchase_ml = True
         
     return {
         "potion_capacity": 1 if purchase_pot else 0,

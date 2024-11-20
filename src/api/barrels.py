@@ -139,8 +139,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         ml_capacity = inventory['ml_capacity']
         total_ml = num_red_ml + num_green_ml + num_blue_ml
 
-        if (total_ml + 200) > ml_capacity:
-            print("NEAR OR AT ML CAPACITY ENDING BARREL PLAN")
+        if total_ml > 0.5 * ml_capacity:
+            print("ending barrel plan, have more than half capacity")
             return barrels_receipt
 
         bottle_plan_day = info.current_time.day
