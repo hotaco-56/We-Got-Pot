@@ -234,31 +234,20 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         ml_needed_list = []
 
-        #Check if more is needed
-        if red_ml_needed * 1.5 < num_red_ml:
-            red_ml_needed  = 0
-        else:
-            ml_needed_list.append(red_ml_needed)
+        total_ml_needed = red_ml_needed + green_ml_needed + blue_ml_needed
 
-        if green_ml_needed * 1.5 < num_green_ml:
-            green_ml_needed  = 0
-        else:
-            ml_needed_list.append(green_ml_needed)
+        red_ml_needed = (red_ml_needed/total_ml_needed) * ml_capacity
+        green_ml_needed = (green_ml_needed/total_ml_needed) * ml_capacity
+        blue_ml_needed = (blue_ml_needed/total_ml_needed) * ml_capacity
 
-        if blue_ml_needed * 1.5 < num_blue_ml:
-            blue_ml_needed  = 0
-        else:
-            ml_needed_list.append(blue_ml_needed)
+        ml_needed_list.append(red_ml_needed)
+        ml_needed_list.append(green_ml_needed)
+        ml_needed_list.append(blue_ml_needed)
 
         print(f"INVENTORY: {inventory}")
         print(f"red ml needed : {red_ml_needed}")
         print(f"green ml needed : {green_ml_needed}")
         print(f"blue ml needed : {blue_ml_needed}")
-
-        total_ml_needed = red_ml_needed + green_ml_needed + blue_ml_needed
-        if total_ml_needed == 0:
-            print("NO ML NEEDED ENDING BARREL PLAN")
-            return barrels_receipt
 
         ml_needed_list.sort()
         ml_needed_list.reverse()
@@ -328,9 +317,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         barrel_catalog_dict['LARGE_BLUE_BARREL'] = barrel.quantity
                         num_large_blue = barrel.quantity
         
-        red_budget = int((red_ml_needed / total_ml_needed) * gold_available)
-        green_budget = int((green_ml_needed / total_ml_needed) * gold_available)
-        blue_budget = int((blue_ml_needed / total_ml_needed) * gold_available)
+        red_budget = int((red_ml_needed / ml_capacity) * gold_available)
+        green_budget = int((green_ml_needed / ml_capacity) * gold_available)
+        blue_budget = int((blue_ml_needed / ml_capacity) * gold_available)
 
         print(f"red budget: {red_budget}")
         print(f"green budget: {green_budget}")
