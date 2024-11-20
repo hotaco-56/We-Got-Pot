@@ -236,9 +236,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         total_ml_needed = red_ml_needed + green_ml_needed + blue_ml_needed
 
-        red_ml_needed = (red_ml_needed/total_ml_needed) * ml_capacity
-        green_ml_needed = (green_ml_needed/total_ml_needed) * ml_capacity
-        blue_ml_needed = (blue_ml_needed/total_ml_needed) * ml_capacity
+        red_ml_needed = (red_ml_needed/total_ml_needed) * (ml_capacity - total_ml)
+        green_ml_needed = (green_ml_needed/total_ml_needed) * (ml_capacity - total_ml)
+        blue_ml_needed = (blue_ml_needed/total_ml_needed) * (ml_capacity - total_ml)
 
         ml_needed_list.append(red_ml_needed)
         ml_needed_list.append(green_ml_needed)
@@ -317,9 +317,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         barrel_catalog_dict['LARGE_BLUE_BARREL'] = barrel.quantity
                         num_large_blue = barrel.quantity
         
-        red_budget = int((red_ml_needed / ml_capacity) * gold_available)
-        green_budget = int((green_ml_needed / ml_capacity) * gold_available)
-        blue_budget = int((blue_ml_needed / ml_capacity) * gold_available)
+        red_budget = int((red_ml_needed / total_ml_needed) * gold_available)
+        green_budget = int((green_ml_needed / total_ml_needed) * gold_available)
+        blue_budget = int((blue_ml_needed / total_ml_needed) * gold_available)
 
         print(f"red budget: {red_budget}")
         print(f"green budget: {green_budget}")
