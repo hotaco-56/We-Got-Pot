@@ -151,6 +151,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     ml_capacity = inventory['ml_capacity']
     total_ml = num_red_ml + num_green_ml + num_blue_ml + num_dark_ml
 
+    if 'LARGE_DARK_BARREL' in barrel_catalog_dict and ml_capacity-total_ml > 10000 and num_dark_ml < 10000:
+        barrel_receipt_dict['LARGE_DARK_BARREL'] += 1
+        total_ml + 10000
+
     if total_ml > 0.5 * ml_capacity:
         print("ending barrel plan, have more than half capacity")
         return barrels_receipt
