@@ -151,8 +151,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     ml_capacity = inventory['ml_capacity']
     total_ml = num_red_ml + num_green_ml + num_blue_ml + num_dark_ml
 
-    print(barrel_catalog_dict)
-
     if total_ml > 0.5 * ml_capacity:
         print("ending barrel plan, have more than half capacity")
         return barrels_receipt
@@ -209,6 +207,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if ml_needed == 0:
             continue
         print(f"gold for {color} : {gold_available}")
+        #wtf
         gold_available = order_barrels(barrel_catalog_dict, barrel_receipt_dict, color, ml_needed, gold_available)
 
     #create output for api
@@ -239,47 +238,51 @@ def order_barrels(barrels: dict, barrel_receipt: dict, color:str, ml_needed:int,
     num_mini = barrels[f'MINI_{color}_BARREL'] if f'MINI_{color}_BARREL' in barrels else 0
 
     #buy large
-    num_to_buy = int(ml_needed // LARGE_ML) 
-    if (num_to_buy > num_large):
-        num_to_buy = num_large
-    if (num_to_buy * LARGE_ML_COST > gold):
-        num_to_buy = num_large // gold
-    if (num_to_buy > 0):
-        barrel_receipt[f'LARGE_{color}_BARREL'] += int(num_to_buy)
-        ml_needed -= num_large * LARGE_ML
-        gold -= num_large * LARGE_ML_COST
+    if num_large != 0:
+        num_to_buy = int(ml_needed // LARGE_ML) 
+        if (num_to_buy > 0):
+            if (num_to_buy > num_large):
+                num_to_buy = num_large
+            if (num_to_buy * LARGE_ML_COST > gold):
+                num_to_buy = int(num_large // gold)
+            barrel_receipt[f'LARGE_{color}_BARREL'] += int(num_to_buy)
+            ml_needed -= num_large * LARGE_ML
+            gold -= num_large * LARGE_ML_COST
 
     #buy medium
-    num_to_buy = int(ml_needed // MEDIUM_ML) 
-    if (num_to_buy > num_medium):
-        num_to_buy = num_medium
-    if (num_to_buy * MEDIUM_ML_COST > gold):
-        num_to_buy =  num_medium // gold
-    if (num_to_buy > 0):
-        barrel_receipt[f'MEDIUM_{color}_BARREL'] += int(num_to_buy)
-        ml_needed -= num_medium * MEDIUM_ML
-        gold -= num_medium * MEDIUM_ML_COST
+    if num_medium != 0:
+        num_to_buy = int(ml_needed // MEDIUM_ML) 
+        if (num_to_buy > 0):
+            if (num_to_buy > num_medium):
+                num_to_buy = num_medium
+            if (num_to_buy * MEDIUM_ML_COST > gold):
+                num_to_buy =  int(num_medium // gold)
+            barrel_receipt[f'MEDIUM_{color}_BARREL'] += int(num_to_buy)
+            ml_needed -= num_medium * MEDIUM_ML
+            gold -= num_medium * MEDIUM_ML_COST
     
     #buy small
-    num_to_buy = int(ml_needed // SMALL_ML) 
-    if (num_to_buy > num_small):
-        num_to_buy = num_small
-    if (num_to_buy * SMALL_ML_COST > gold):
-        num_to_buy = num_small // gold
-    if (num_to_buy > 0):
-        barrel_receipt[f'SMALL_{color}_BARREL'] += int(num_to_buy)
-        ml_needed -= num_small * SMALL_ML
-        gold -= num_small * SMALL_ML_COST
+    if num_small != 0:
+        num_to_buy = int(ml_needed // SMALL_ML) 
+        if (num_to_buy > 0):
+            if (num_to_buy > num_small):
+                num_to_buy = num_small
+            if (num_to_buy * SMALL_ML_COST > gold):
+                num_to_buy = int(num_small // gold)
+            barrel_receipt[f'SMALL_{color}_BARREL'] += int(num_to_buy)
+            ml_needed -= num_small * SMALL_ML
+            gold -= num_small * SMALL_ML_COST
 
     #buy MINI
-    num_to_buy = int(ml_needed // MINI_ML) 
-    if (num_to_buy > num_mini):
-        num_to_buy = num_mini
-    if (num_to_buy * MINI_ML_COST > gold):
-        num_to_buy = num_mini // gold
-    if (num_to_buy > 0):
-        barrel_receipt[f'MEDIUM_{color}_BARREL'] += int(num_to_buy)
-        ml_needed -= num_mini * MINI_ML
-        gold -= num_mini * MINI_ML_COST
+    if num_mini != 0:
+        num_to_buy = int(ml_needed // MINI_ML) 
+        if (num_to_buy > 0):
+            if (num_to_buy > num_mini):
+                num_to_buy = num_mini
+            if (num_to_buy * MINI_ML_COST > gold):
+                num_to_buy = int(num_mini // gold)
+            barrel_receipt[f'MINI_{color}_BARREL'] += int(num_to_buy)
+            ml_needed -= num_mini * MINI_ML
+            gold -= num_mini * MINI_ML_COST
     
     return gold
