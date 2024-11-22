@@ -30,6 +30,7 @@ def get_catalog():
             SELECT sku, red, green, blue, dark, quantity, price, name
             FROM potions
             WHERE quantity > 0
+            ORDER BY quantity DESC
             """
         )).mappings().fetchall()
 
